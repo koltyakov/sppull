@@ -39,6 +39,7 @@ sppull(context, options)
 ##### Options:
 - `spRootFolder` - root folder in SharePoint to pull from, string, required
 - `dlRootFolder` - local root folder where files and folders will be saved to, string, required
+- `spBaseFolder` - base folder path which is omitted then saving files locally, string, optional
 - `recursive` - to pull all files and folders recursively, boolean, optional, default is `true`
 - `ignoreEmptyFolders` - to ignore local creation of SharePoint empty folders, optional, default is `true`
 - `foderStructureOnly` - to ignore files, recreate only folders' structure, optional, default is `false`
@@ -48,9 +49,9 @@ sppull(context, options)
 - `metaFields` - array of internal field names to request along with the files, optional, array of strings
 
 #### Overloads / cases:
-- [ ] All files with folder structure from spRootFolder
-- [ ] Files from spRootFolder folder, first hierarchy level only
-- [ ] Folders structure from spRootFolder without files
+- [x] All files with folder structure from spRootFolder
+- [x] Files from spRootFolder folder, first hierarchy level only
+- [x] Folders structure from spRootFolder without files
 - [ ] Files based on array of paths provided strictly
 - [ ] Files based on REST filters conditions
 - [ ] Files based on CAML query conditions

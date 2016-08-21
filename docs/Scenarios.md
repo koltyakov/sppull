@@ -125,10 +125,7 @@ sppull(context, options)
     .then(function(downloadResults) {
         console.log("Files are downloaded");
         downloadResults.forEach(function(file) {
-            console.log(
-                "File with ID " + file.ID + 
-                ", located in SharePoint over the URL " + file.ServerRelativeUrl + 
-                ", is downloaded to " + file.SavedToPath);
+            console.log("File " + file.ServerRelativeUrl +  " is downloaded to " + file.SavedToPath);
             console.log("It's pulled metadata is", file.metadata);
         });
     })
