@@ -33,16 +33,16 @@ sppull(context, options)
 - `password` - password, string, required
 
 ##### Options:
-- `spRootFolder` - root folder in SharePoint to pull from, string, required
-- `dlRootFolder` - local root folder where files and folders will be saved to, string, required
-- `spBaseFolder` - base folder path which is omitted then saving files locally, string, optional
-- `recursive` - to pull all files and folders recursively, boolean, optional, default is `true`
-- `ignoreEmptyFolders` - to ignore local creation of SharePoint empty folders, optional, default is `true`
-- `foderStructureOnly` - to ignore files, recreate only folders' structure, optional, default is `false`
-- `strictObjects` - array of files and folders relative paths within the `spRootFolder`, optional, array of strings
-- `restCondition` - SharePoint REST filter conditions to use, optional, string
-- `camlCondition` - SharePoint CAML conditions to use, optional, string
-- `metaFields` - array of internal field names to request along with the files, optional, array of strings
+- `spRootFolder` - root folder in SharePoint to pull from [string, required]
+- `dlRootFolder` - local root folder where files and folders will be saved to [string, optional, default: `./Downloads`]
+- `spBaseFolder` - base folder path which is omitted then saving files locally [string, optional, default: equals to spRootFolder]
+- `recursive` - to pull all files and folders recursively [boolean, optional, default: `true`]
+- `ignoreEmptyFolders` - to ignore local creation of SharePoint empty folders [boolean, optional, default: `true`]
+- `foderStructureOnly` - to ignore files, recreate only folders' structure [boolean, optional, default: `false`]
+- `strictObjects` - array of files and folders relative paths within the `spRootFolder`, [array of strings, optional]
+- `restCondition` - SharePoint REST filter conditions to use [string, optional]
+- `camlCondition` - SharePoint CAML conditions to use [string, optional]
+- `metaFields` - array of internal field names to request along with the files [array of strings, optional]
 
 #### Overloads / cases (checked are implemented, unchecked will be soon):
 - [x] All files with folder structure from spRootFolder
@@ -53,7 +53,7 @@ sppull(context, options)
 - [ ] Files based on CAML query conditions
 - [ ] Pull for documents metadata to use it in callback's custom logic
 
-Use case scenarios could be found on the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Scenarios.md) page, it presents different variations of options usage for different situation.
+Use case scenarios can be found on the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Scenarios.md) page. This page suggests combinations of options which are optimal for certain use cases.
 
 #### successHandler
 Callback gets called upon successful files download.
@@ -62,7 +62,7 @@ Callback gets called upon successful files download.
 Callback gets executed in case of exception inside `sppull`. Accepts error object as first argument for callback.
 
 ## Samples
-Use [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Scenarios.md) page to see different options available with `sppull`.
+Refer to the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Scenarios.md) page for suggested options combinations available with `sppull`.
 
 #### Basic usage:
 ```javascript
@@ -96,6 +96,6 @@ sppull(context, options)
 
 ## Inspiration and references
 
-This project creation was inspired by [spsave](https://github.com/s-KaiNet/spsave) by [Sergei Sergeev](https://github.com/s-KaiNet) and [gulp-spsync](https://github.com/wictorwilen/gulp-spsync) by [Wictor Wilén](https://github.com/wictorwilen) projects.
+This project was inspired by [spsave](https://github.com/s-KaiNet/spsave) by [Sergei Sergeev](https://github.com/s-KaiNet) and [gulp-spsync](https://github.com/wictorwilen/gulp-spsync) by [Wictor Wilén](https://github.com/wictorwilen) projects.
 
 SPPull depends heavily on [sp-request](https://github.com/s-KaiNet/sp-request) module and use it to send REST queries to SharePoint.
