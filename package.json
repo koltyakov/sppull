@@ -1,9 +1,12 @@
 {
   "name": "sppull",
   "description": "Download files from SharePoint document libraries using Node.js without hassles",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Andrew Koltyakov <andrew.koltyakov@gmail.com>",
   "main": "index.js",
+  "engines": {
+    "node": ">=4.0.0"
+  },  
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "runtest": "node ./experimental/runtest.js"
@@ -18,6 +21,10 @@
     "rest",
     "sync"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/koltyakov/sppull.git"
+  },
   "licenses": [
     {
       "type": "MIT",
