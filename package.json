@@ -1,7 +1,7 @@
 {
   "name": "sppull",
   "description": "Download files from SharePoint document libraries using Node.js without hassles",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Andrew Koltyakov <andrew.koltyakov@gmail.com>",
   "main": "index.js",
   "scripts": {
