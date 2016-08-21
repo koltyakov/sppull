@@ -26,7 +26,6 @@
   "dependencies": {
     "bluebird": "^3.4.1",
     "mkdirp": "^0.5.1",
-    "sp-request": "^1.1.0",
-    "url-parse": "^1.1.3"
+    "sp-request": "^1.1.0"
   }
 }

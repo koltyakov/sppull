@@ -2,10 +2,6 @@
 
 Node.js module for downloading files from SharePoint document libraries.
 
-> ### This is an initial commit with documentation only
-> Implementation is in a progress. Project uses DDD approach on current stage.<br>
-> Stay tuned, in upcoming push it will receive its documented features and will be published to NPM as well.
-
 ## Supported SharePoint versions:
 - SharePoint Online
 - SharePoint 2013
@@ -48,7 +44,7 @@ sppull(context, options)
 - `camlCondition` - SharePoint CAML conditions to use, optional, string
 - `metaFields` - array of internal field names to request along with the files, optional, array of strings
 
-#### Overloads / cases:
+#### Overloads / cases (checked are implemented, unchecked will be soon):
 - [x] All files with folder structure from spRootFolder
 - [x] Files from spRootFolder folder, first hierarchy level only
 - [x] Folders structure from spRootFolder without files

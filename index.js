@@ -1,6 +1,5 @@
 var fs = require("fs");
 var path = require("path");
-var URL = require('url-parse');
 var mkdirp = require('mkdirp');
 var Promise = require("bluebird");
 var sprequest = require('sp-request');
