@@ -79,6 +79,19 @@ var options = {
 ```
 If a file is sitting within explicitly provided folder, folder settings will be used, as a file setting is a subset of it's parent.
 
+### Download files from spRootFolder ignoring some folders and files
+```javascript
+var options = {
+    spRootFolder: "/subsite/_catalogs/masterpage",
+    dlRootFolder: "./Downloads/Assets",
+    excludeObjects: [
+        "/Display%20Templates/Search",
+        "/Display%20Templates/Filters/somefiletoignore.js",
+        "/somelargefile.mp4"
+    ]
+};
+```
+
 ### Download files which correspond to a REST filter condition
 ```javascript
 // REST filter for Approved documents
