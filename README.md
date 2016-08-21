@@ -1,5 +1,9 @@
 # SPPull - simple client to pull and download files from SharePoint
 
+[![NPM](https://nodei.co/npm/spsave.png?mini=true)](https://nodei.co/npm/spsave/)
+
+[![npm version](https://badge.fury.io/js/sppull.svg)](https://badge.fury.io/js/sppull)
+
 Node.js module for downloading files from SharePoint document libraries.
 
 ## Supported SharePoint versions:
