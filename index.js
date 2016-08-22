@@ -59,12 +59,17 @@ var sppull = function() {
                 spRootFolder = spRootFolder.substring(0, spRootFolder.length - 1);
             }
 
-            restUrl = context.siteUrl + "/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)" + 
+            restUrl = context.siteUrl + "/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)" +
                       "?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields" + // ,Folders/Folders,Folders/Files, Folders/ListItemAllFields,Files/ListItemAllFields,Folders/Properties,Files/Properties
                       "&$select=" +
                            "Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeModified," +
                            "Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeModified,Files/ModifiedBy" +
                       "&@FolderServerRelativeUrl='" + encodeURIComponent(spRootFolder) + "'";
+
+            // if (typeof _self.options.restCondition !== "undefined" && _self.options.restCondition.length > 0) {
+            //     restUrl += "&" + _self.options.restCondition;
+            // }
+            // console.log(restUrl);
 
             spr.get(restUrl)
                 .then(function (response) {
@@ -241,10 +246,19 @@ var sppull = function() {
     var runDownloadFilesRecursively = function() {
         return new Promise(function(resolve, reject) {
             getStructureRecursive(null, null, function(data) {
-                if ((data.files || []).length > 0) {
-                    downloadFilesQueue(data.files, 0, resolve);
+                var downloadMyFilesHandler = function() {
+                    if ((data.files || []).length > 0) {
+                        downloadFilesQueue(data.files, 0, resolve);
+                    } else {
+                        resolve([]);
+                    }
+                };
+                if (_self.options.createEmptyFolders) {
+                    createFoldersQueue(data.folders, 0, function() {
+                        downloadMyFilesHandler();
+                    });
                 } else {
-                    resolve([]);
+                    downloadMyFilesHandler();
                 }
             });
         });
@@ -252,12 +266,38 @@ var sppull = function() {
     var runDownloadFilesFlat = function() {
         return new Promise(function(resolve, reject) {
             restOperations.getFolderContent(_self.context, _self.options.spRootFolder, function(data) {
-                if ((data.files || []).length > 0) {
-                    downloadFilesQueue(data.files, 0, resolve);
+                var downloadMyFilesHandler = function() {
+                    if ((data.files || []).length > 0) {
+                        downloadFilesQueue(data.files, 0, resolve);
+                    } else {
+                        resolve([]);
+                    }
+                };
+                if (_self.options.createEmptyFolders) {
+                    createFoldersQueue(data.folders, 0, function() {
+                        downloadMyFilesHandler();
+                    });
                 } else {
-                    resolve([]);
+                    downloadMyFilesHandler();
                 }
             });
+        });
+    };
+    var runDownloadStrictObjects = function() {
+        return new Promise(function(resolve, reject) {
+            var filesList = _self.options.strictObjects.filter(function(d) {
+                var pathArr = d.split("/");
+                return pathArr[pathArr.length - 1].indexOf(".") !== -1;
+            }).map(function(d) {
+                return {
+                    ServerRelativeUrl: d
+                };
+            });
+            if (filesList.length > 0) {
+                downloadFilesQueue(filesList, 0, resolve);
+            } else {
+                resolve([]);
+            }
         });
     };
 
@@ -278,18 +318,30 @@ var sppull = function() {
             _self.options.foderStructureOnly = false;
         }
 
+        if (typeof _self.options.createEmptyFolders === "undefined") {
+            _self.options.createEmptyFolders = true;
+        }
+
         if (typeof _self.options.muteConsole === "undefined") {
             _self.options.muteConsole = false;
         }
 
-        if (!_self.options.foderStructureOnly) {
-            if (_self.options.recursive) {
-                return runDownloadFilesRecursively();
-            } else {
-                return runDownloadFilesFlat();
-            }
+        if (typeof _self.options.strictObjects !== "undefined" && Array.isArray([_self.options.strictObjects])) {
+
+            return runDownloadStrictObjects();
+
         } else {
-            return runCreateFoldersRecursively();
+
+            if (!_self.options.foderStructureOnly) {
+                if (_self.options.recursive) {
+                    return runDownloadFilesRecursively();
+                } else {
+                    return runDownloadFilesFlat();
+                }
+            } else {
+                return runCreateFoldersRecursively();
+            }
+
         }
     };
 

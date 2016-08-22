@@ -47,13 +47,14 @@ sppull(context, options)
 - `restCondition` - SharePoint REST filter conditions to use [string, optional]
 - `camlCondition` - SharePoint CAML conditions to use [string, optional]
 - `metaFields` - array of internal field names to request along with the files [array of strings, optional]
+- `createEmptyFolders` - to create empty folders along with documents download task [boolean, optional, default: `true`]
 - `muteConsole` - to mute console messages during transport queries to SharePoint API [boolean, optional, default: `false`]
 
 #### Overloads / cases (checked are implemented, unchecked will be soon):
 - [x] All files with folder structure from spRootFolder
 - [x] Files from spRootFolder folder, first hierarchy level only
 - [x] Folders structure from spRootFolder without files
-- [ ] Files based on array of paths provided strictly
+- [x] Files based on array of paths provided strictly [works with array of files only right now]
 - [ ] Files based on REST filters conditions
 - [ ] Files based on CAML query conditions
 - [ ] Pull for documents metadata to use it in callback's custom logic

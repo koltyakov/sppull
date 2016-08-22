@@ -66,6 +66,9 @@ var options = {
 ```
 
 ### Download specific files or folders within root folder explicitly
+
+> Works only with array of files names, folders aren't implemented yet
+
 ```javascript
 var options = {
     spRootFolder: "/subsite/_catalogs/masterpage",
@@ -80,6 +83,9 @@ var options = {
 If a file is sitting within explicitly provided folder, folder settings will be used, as a file setting is a subset of it's parent.
 
 ### Download files from spRootFolder ignoring some folders and files
+
+> Not implemented yet
+
 ```javascript
 var options = {
     spRootFolder: "/subsite/_catalogs/masterpage",
@@ -93,6 +99,9 @@ var options = {
 ```
 
 ### Download files which correspond to a REST filter condition
+
+> Not implemented yet
+
 ```javascript
 // REST filter for Approved documents
 var restFilters = "$filter=OData__ModerationStatus eq 0";
@@ -104,6 +113,9 @@ var options = {
 ```
 
 ### Download files which correspond to a CAML condition
+
+> Not implemented yet
+
 ```javascript
 // CAML to filter only Approved documents
 var camlString = "<Query>" +
@@ -121,7 +133,11 @@ var options = {
 };
 ```
 
-### Download files with their metadata 
+### Download files with their metadata
+
+> Not implemented yet, but basic metadata is already accessible in the callback <br>
+> not in results[...].metadata though
+
 ```javascript
 var options = {
     spRootFolder: "/subsite/Shared%20Documents/Contracts",
