@@ -60,7 +60,7 @@ var sppull = function() {
 
             restUrl = context.siteUrl + "/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)" + 
                       "?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields" + // ,Folders/Folders,Folders/Files, Folders/ListItemAllFields,Files/ListItemAllFields,Folders/Properties,Files/Properties
-                      "&$select=" + 
+                      "&$select=" +
                            "Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeModified," +
                            "Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeModified,Files/ModifiedBy" +
                       "&@FolderServerRelativeUrl='" + encodeURIComponent(spRootFolder) + "'";
@@ -93,7 +93,7 @@ var sppull = function() {
         var downloadRoot = _self.options.dlRootFolder; 
         var createFolder = function(spFolderPath, spBaseFolder, downloadRoot, callback) {
             var saveFolderPath = downloadRoot + "/" + decodeURIComponent(spFolderPath).replace(decodeURIComponent(spBaseFolder), "");
-            var saveFolderPath = path.dirname(saveFolderPath);
+            // var saveFolderPath = path.dirname(saveFolderPath); // Cause an issue when creating a folder, leaf folders are ignored
             mkdirp(saveFolderPath, function(err) {
                 if (err) {
                     console.log("Error creating folder " + "`" + saveFolderPath + " `", err);
@@ -141,8 +141,9 @@ var sppull = function() {
         var spRootFolder;
         if (typeof foldersQueue === "undefined" || foldersQueue === null) {
             foldersQueue = [];
-            spRootFolder = _self.options.spRootFolder
+            spRootFolder = _self.options.spRootFolder;
             exitQueue = false;
+            console.log("");
         } else {
             foldersQueue.some(function(fi) {
                 if (typeof fi.processed === "undefined") {
@@ -162,9 +163,10 @@ var sppull = function() {
                 (results.folders || []).forEach(function(folder) {
                     var folderElement  = {
                         folder: folder,
-                        serverRelativeUrl: folder.ServerRelativeUrl
+                        serverRelativeUrl: folder.ServerRelativeUrl,
+                        processed: false // Otherwise some folders will be ignored when only structure is needed
                     };
-                    folderElement.processed = (folder.ItemCount === 0);
+                    // folderElement.processed = (folder.ItemCount === 0);
                     foldersQueue.push(folderElement);
                 });
                 filesList = filesList.concat(results.files || []);
@@ -215,7 +217,7 @@ var sppull = function() {
                 }
             });
         });
-    };    
+    };
 
     _self.sppull = function(context, options) {
 

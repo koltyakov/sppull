@@ -21,10 +21,9 @@ npm install sppull --save-dev
 ```javascript
 var sppull = require("sppull").sppull;
 
-sppull(context, options)
-    .then(successHandler, errorHandler);
- 
- /* OR */
+var context = {/*...*/};
+var options = {/*...*/};
+
 sppull(context, options)
     .then(successHandler)
     .catch(errorHandler);
