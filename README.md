@@ -47,6 +47,7 @@ sppull(context, options)
 - `restCondition` - SharePoint REST filter conditions to use [string, optional]
 - `camlCondition` - SharePoint CAML conditions to use [string, optional]
 - `metaFields` - array of internal field names to request along with the files [array of strings, optional]
+- `muteConsole` - to mute console messages during transport queries to SharePoint API [boolean, optional, default: `false`]
 
 #### Overloads / cases (checked are implemented, unchecked will be soon):
 - [x] All files with folder structure from spRootFolder

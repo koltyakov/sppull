@@ -1,6 +1,7 @@
 var fs = require("fs");
 var path = require("path");
 var mkdirp = require('mkdirp');
+var readline = require('readline');
 var Promise = require("bluebird");
 var sprequest = require('sp-request');
 var spr = null;
@@ -104,12 +105,24 @@ var sppull = function() {
                 }
             });
         };
+
+        if (!_self.options.muteConsole) {
+            readline.clearLine(process.stdout, 0);
+            readline.cursorTo(process.stdout, 0, null);
+            process.stdout.write("Creating folders: " + (index + 1) + " / " + foldersList.length);
+        }
+
         createFolder(spFolderPath, spBaseFolder, downloadRoot, function(localFolderPath) {
             foldersList[index].SavedToLocalPath = localFolderPath;
             index += 1;
             if (index < foldersList.length) {
                 createFoldersQueue(foldersList, index, callback);
             } else {
+
+                if (!_self.options.muteConsole) {
+                    process.stdout.write("\n");
+                }
+
                 if (callback && typeof callback === "function") {
                     callback(foldersList);
                 }
@@ -119,13 +132,25 @@ var sppull = function() {
     var downloadFilesQueue = function(filesList, index, callback) {
         var spFilePath = filesList[index].ServerRelativeUrl;
         var spBaseFolder = _self.options.spBaseFolder;
-        var downloadRoot = _self.options.dlRootFolder; 
+        var downloadRoot = _self.options.dlRootFolder;
+
+        if (!_self.options.muteConsole) {
+            readline.clearLine(process.stdout, 0);
+            readline.cursorTo(process.stdout, 0, null);
+            process.stdout.write("Downloading files: " + (index + 1) + " / " + filesList.length);
+        }
+
         restOperations.downloadFile(_self.context, spFilePath, spBaseFolder, downloadRoot, function(localFilePath) {
             filesList[index].SavedToLocalPath = localFilePath;
             index += 1;
             if (index < filesList.length) {
                 downloadFilesQueue(filesList, index, callback);
             } else {
+
+                if (!_self.options.muteConsole) {
+                    process.stdout.write("\n");
+                }
+
                 if (callback && typeof callback === "function") {
                     callback(filesList);
                 }
@@ -143,7 +168,6 @@ var sppull = function() {
             foldersQueue = [];
             spRootFolder = _self.options.spRootFolder;
             exitQueue = false;
-            console.log("");
         } else {
             foldersQueue.some(function(fi) {
                 if (typeof fi.processed === "undefined") {
@@ -159,6 +183,19 @@ var sppull = function() {
             });
         }
         if (!exitQueue) {
+            var cntInQueue = 0;
+            foldersQueue.forEach(function(folder) {
+                if (folder.processed) {
+                    cntInQueue += 1;
+                }
+            });
+
+            if (!_self.options.muteConsole) {
+                readline.clearLine(process.stdout, 0);
+                readline.cursorTo(process.stdout, 0, null);
+                process.stdout.write("Folders proceeding: " + cntInQueue + " / " + foldersQueue.length + " (reqursive scanning...)");
+            }
+
             restOperations.getFolderContent(_self.context, spRootFolder, function(results) {
                 (results.folders || []).forEach(function(folder) {
                     var folderElement  = {
@@ -173,6 +210,11 @@ var sppull = function() {
                 getStructureRecursive(foldersQueue, filesList, callback);
             });
         } else {
+
+            if (!_self.options.muteConsole) {
+                process.stdout.write("\n");
+            }
+
             if (callback && typeof callback === "function") {
                 var foldersList = foldersQueue.map(function(folder) {
                     return folder.folder;
@@ -234,6 +276,10 @@ var sppull = function() {
 
         if (typeof _self.options.foderStructureOnly === "undefined") {
             _self.options.foderStructureOnly = false;
+        }
+
+        if (typeof _self.options.muteConsole === "undefined") {
+            _self.options.muteConsole = false;
         }
 
         if (!_self.options.foderStructureOnly) {

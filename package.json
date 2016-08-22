@@ -1,12 +1,12 @@
 {
   "name": "sppull",
   "description": "Download files from SharePoint document libraries using Node.js without hassles",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "author": "Andrew Koltyakov <andrew.koltyakov@gmail.com>",
   "main": "index.js",
   "engines": {
     "node": ">=4.0.0"
-  },  
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "runtest": "node ./LocalTests/runtests.js"
@@ -34,6 +34,7 @@
   "dependencies": {
     "bluebird": "^3.4.1",
     "mkdirp": "^0.5.1",
+    "readline": "^1.3.0",
     "sp-request": "^1.1.0"
   }
 }
