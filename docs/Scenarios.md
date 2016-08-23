@@ -15,7 +15,7 @@ Credentials could be stored in process environment variables or any config which
 var context = {
     siteUrl: "http://contoso.sharepoint.com/subsite",
     username: "user@contoso.com",
-    password: "_Password_"  
+    password: "_Password_"
 };
 ```
 
@@ -27,7 +27,7 @@ var sppull = require("sppull").sppull;
 var context = {
     siteUrl: "http://contoso.sharepoint.com/subsite",
     username: "user@contoso.com",
-    password: "_Password_"  
+    password: "_Password_"
 };
 
 var options = {
@@ -135,16 +135,13 @@ var options = {
 
 ### Download files with their metadata
 
-> Not implemented yet, but basic metadata is already accessible in the callback <br>
-> not in results[...].metadata though
-
 ```javascript
 var options = {
     spRootFolder: "/subsite/Shared%20Documents/Contracts",
     dlRootFolder: "./Downloads/Contracts",
     metaFields: [
         "Title",
-        "_ModerationStatus",
+        "MyCustomAttr",
         "Modified",
         "Editor"
     ]

@@ -57,7 +57,7 @@ sppull(context, options)
 - [x] Files based on array of paths provided strictly [works with array of files only right now]
 - [ ] Files based on REST filters conditions
 - [ ] Files based on CAML query conditions
-- [ ] Pull for documents metadata to use it in callback's custom logic
+- [x] Pull for documents metadata to use it in callback's custom logic
 
 Use case scenarios can be found on the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Scenarios.md) page. This page suggests combinations of options which are optimal for certain use cases.
 

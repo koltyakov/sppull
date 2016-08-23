@@ -62,20 +62,50 @@ var sppull = function() {
             restUrl = context.siteUrl + "/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)" +
                       "?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields" + // ,Folders/Folders,Folders/Files, Folders/ListItemAllFields,Files/ListItemAllFields,Folders/Properties,Files/Properties
                       "&$select=" +
-                           "Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeModified," +
-                           "Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeModified,Files/ModifiedBy" +
+                        "##MetadataSrt#" +
+                        "Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeModified," +
+                        "Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeModified,Files/ModifiedBy" +
+                      // "##RestCondition#" +
                       "&@FolderServerRelativeUrl='" + encodeURIComponent(spRootFolder) + "'";
 
-            // if (typeof _self.options.restCondition !== "undefined" && _self.options.restCondition.length > 0) {
-            //     restUrl += "&" + _self.options.restCondition;
+            var metadataStr = "";
+            if (_self.options.metaFields.length > 0) {
+                metadataStr = _self.options.metaFields.map(function(fieldName) {
+                    return "Files/ListItemAllFields/" + fieldName;
+                }).join(",") + ",";
+            }
+            restUrl = restUrl.replace(/##MetadataSrt#/g, metadataStr);
+
+            // var restFilterCondition = "";
+            // if (_self.options.restCondition.length > 0) {
+            //     if (_self.options.restCondition.indexOf("$filter=") === -1) {
+            //         _self.options.restCondition = "$filter=" + _self.options.restCondition;
+            //     }
+            //     restFilterCondition = "&" + _self.options.restCondition;
             // }
-            // console.log(restUrl);
+            // restUrl = restUrl.replace("##RestCondition#", restFilterCondition);
 
             spr.get(restUrl)
                 .then(function (response) {
+
+                    var files = response.body.d.Files.results;
+                    if (_self.options.metaFields.length > 0) {
+                        files.forEach(function(data) {
+                            data.metadata = {};
+                            _self.options.metaFields.forEach(function(fd) {
+                                if (typeof data.ListItemAllFields !== "undefined") {
+                                    // console.log(data.ListItemAllFields);
+                                    if (data.ListItemAllFields.hasOwnProperty(fd)) {
+                                        data.metadata[fd] = data.ListItemAllFields[fd];
+                                    }
+                                }
+                            });
+                        });
+                    }
+
                     var results = {
                         folders: response.body.d.Folders.results,
-                        files: response.body.d.Files.results
+                        files: files
                     };
 
                     if (callback && typeof callback === "function") {
@@ -320,6 +350,14 @@ var sppull = function() {
 
         if (typeof _self.options.createEmptyFolders === "undefined") {
             _self.options.createEmptyFolders = true;
+        }
+
+        if (typeof _self.options.metaFields === "undefined") {
+            _self.options.metaFields = [];
+        }
+
+        if (typeof _self.options.restCondition === "undefined") {
+            _self.options.restCondition = "";
         }
 
         if (typeof _self.options.muteConsole === "undefined") {
