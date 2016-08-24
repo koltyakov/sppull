@@ -124,24 +124,21 @@ var options = {
 
 ### Download files which correspond to a CAML condition
 
-> Not implemented yet
-
 ```javascript
 // CAML to filter only Approved documents
-var camlString = "<Query>" +
-                    "<Where>" +
-                        "<Eq>" +
-                        "<FieldRef Name='_ModerationStatus' />" +
-                        "<Value Type='ModStat'>0</Value>" +
-                        "</Eq>" +
-                    "</Where>" +
-                 "</Query>";
+var camlString = "<Eq>" +
+                    "<FieldRef Name='_ModerationStatus' />" +
+                    "<Value Type='ModStat'>0</Value>" +
+                 "</Eq>";
 var options = {
-    spRootFolder: "/subsite/Shared%20Documents/Contracts",
     dlRootFolder: "./Downloads/Contracts",
+    spBaseFolder: "/subsite/Shared%20Documents/Contracts", // To avoid redundant folder structure in download folder
+    spDocLibUrl: "/subsite/Shared%20Documents", // Mandatory in this scenario
     camlCondition: camlString
 };
 ```
+`spRootFolder` is ignores when both `spDocLibUrl` and `camlCondition` are in options.
+`camlCondition` string is placed inside the following CAML `"<View Scope='Recursive'><Query><Where>" + camlString + "</Where></Query></View>"`. View, Query, Where shouldn't be a part of `camlCondition` property. 
 
 ### Download files with their metadata
 

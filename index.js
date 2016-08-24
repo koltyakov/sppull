@@ -2,6 +2,7 @@ var fs = require("fs");
 var path = require("path");
 var mkdirp = require('mkdirp');
 var readline = require('readline');
+var colors = require('colors');
 var Promise = require("bluebird");
 var sprequest = require('sp-request');
 var spr = null;
@@ -53,7 +54,7 @@ var sppull = function() {
                     });
                 })
                 .catch(function (err) {
-                    console.log("Error in operations.downloadFile:", err.message);
+                    console.log(colors.red.bold("\nError in operations.downloadFile:"), colors.red(err.message));
                     if (callback && typeof callback === "function") {
                         callback(err.message);
                     }
@@ -67,12 +68,11 @@ var sppull = function() {
             }
 
             restUrl = context.siteUrl + "/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)" +
-                      "?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields" + // ,Folders/Folders,Folders/Files, Folders/ListItemAllFields,Files/ListItemAllFields,Folders/Properties,Files/Properties
+                      "?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields" +
                       "&$select=" +
                         "##MetadataSrt#" +
                         "Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeModified," +
                         "Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeModified,Files/ModifiedBy" +
-                      // "##RestCondition#" +
                       "&@FolderServerRelativeUrl='" + encodeURIComponent(spRootFolder) + "'";
 
             var metadataStr = "";
@@ -83,15 +83,6 @@ var sppull = function() {
             }
             restUrl = restUrl.replace(/##MetadataSrt#/g, metadataStr);
 
-            // var restFilterCondition = "";
-            // if (_self.options.restCondition.length > 0) {
-            //     if (_self.options.restCondition.indexOf("$filter=") === -1) {
-            //         _self.options.restCondition = "$filter=" + _self.options.restCondition;
-            //     }
-            //     restFilterCondition = "&" + _self.options.restCondition;
-            // }
-            // restUrl = restUrl.replace("##RestCondition#", restFilterCondition);
-
             spr.get(restUrl)
                 .then(function (response) {
 
@@ -101,7 +92,6 @@ var sppull = function() {
                             data.metadata = {};
                             _self.options.metaFields.forEach(function(fd) {
                                 if (typeof data.ListItemAllFields !== "undefined") {
-                                    // console.log(data.ListItemAllFields);
                                     if (data.ListItemAllFields.hasOwnProperty(fd)) {
                                         data.metadata[fd] = data.ListItemAllFields[fd];
                                     }
@@ -120,12 +110,81 @@ var sppull = function() {
                     }
                 })
                 .catch(function (err) {
-                    console.log("Error in operations.getFolderContent:", err.message);
+                    console.log(colors.red.bold("\nError in operations.getFolderContent:"), colors.red(err.message));
                     if (callback && typeof callback === "function") {
                         callback(err.message);
                     }
                 });
         };
+        operations.getContentWithCaml = function(context, spDocLibUrl, camlStr, callback) {
+            spr = getCachedRequest(context);
+            spr.requestDigest(context.siteUrl)
+                .then(function (digest) {
+                    var restUrl;
+                    restUrl = context.siteUrl + "/_api/Web/GetList(@DocLibUrl)/GetItems" +
+                            "?$select=" +
+                                "##MetadataSrt#" +
+                                "Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeModified,Length,ModifiedBy" +
+                            "&@DocLibUrl='" + encodeURIComponent(spDocLibUrl) + "'";
+                    var metadataStr = "";
+                    if (_self.options.metaFields.length > 0) {
+                        metadataStr = _self.options.metaFields.join(",") + ",";
+                    }
+                    restUrl = restUrl.replace(/##MetadataSrt#/g, metadataStr);
+                    return spr.post(restUrl, {
+                        body: {
+                            query: {
+                                __metadata: {
+                                    type: "SP.CamlQuery"
+                                },
+                                ViewXml: "<View Scope='Recursive'><Query><Where>" + camlStr + "</Where></Query></View>" // <Eq><FieldRef Name='MyTestAttr'/><Value Type='Text'>MyTestValue</Value></Eq>
+                            }
+                        },
+                        headers: {
+                            "X-RequestDigest": digest,
+                            "accept": "application/json; odata=verbose",
+                            "content-type": "application/json; odata=verbose"
+                        }
+                    });
+                })
+                .then(function (response) {
+                    var filesData = [];
+                    var foldersData = [];
+
+                    response.body.d.results.forEach(function(item) {
+                        if (_self.options.metaFields.length > 0) {
+                            item.metadata = {};
+                            _self.options.metaFields.forEach(function(fd) {
+                                if (item.hasOwnProperty(fd)) {
+                                    item.metadata[fd] = item[fd];
+                                }
+                            });
+                        }
+                        if (item.FSObjType === 0) {
+                            item.ServerRelativeUrl = item.FileRef;
+                            filesData.push(item);
+                        } else {
+                            foldersData.push(item);
+                        }
+                    });
+
+                    var results = {
+                        files: filesData,
+                        folders: foldersData
+                    };
+
+                    if (callback && typeof callback === "function") {
+                        callback(results);
+                    }
+                })
+                .catch(function (err) {
+                    console.log(colors.red.bold("\nError in operations.getContentWithCaml:"), colors.red(err.message));
+                    if (callback && typeof callback === "function") {
+                        callback(err.message);
+                    }
+                });
+        };
+
         return operations;
     };
     var restOperations = new RestOperations();
@@ -136,10 +195,9 @@ var sppull = function() {
         var downloadRoot = _self.options.dlRootFolder; 
         var createFolder = function(spFolderPath, spBaseFolder, downloadRoot, callback) {
             var saveFolderPath = downloadRoot + "/" + decodeURIComponent(spFolderPath).replace(decodeURIComponent(spBaseFolder), "");
-            // var saveFolderPath = path.dirname(saveFolderPath); // Cause an issue when creating a folder, leaf folders are ignored
             mkdirp(saveFolderPath, function(err) {
                 if (err) {
-                    console.log("Error creating folder " + "`" + saveFolderPath + " `", err);
+                    console.log(colors.red.bold("Error creating folder " + "`" + saveFolderPath + " `"), colors.red(err));
                     // throw err;
                 };
                 if (callback && typeof callback === "function") {
@@ -151,7 +209,7 @@ var sppull = function() {
         if (!_self.options.muteConsole) {
             readline.clearLine(process.stdout, 0);
             readline.cursorTo(process.stdout, 0, null);
-            process.stdout.write("Creating folders: " + (index + 1) + " / " + foldersList.length);
+            process.stdout.write(colors.green.bold("Creating folders: ") + (index + 1) + " out of " + foldersList.length);
         }
 
         createFolder(spFolderPath, spBaseFolder, downloadRoot, function(localFolderPath) {
@@ -179,7 +237,7 @@ var sppull = function() {
         if (!_self.options.muteConsole) {
             readline.clearLine(process.stdout, 0);
             readline.cursorTo(process.stdout, 0, null);
-            process.stdout.write("Downloading files: " + (index + 1) + " / " + filesList.length);
+            process.stdout.write(colors.green.bold("Downloading files: ") + (index + 1) + " out of " + filesList.length);
         }
 
         restOperations.downloadFile(_self.context, spFilePath, spBaseFolder, downloadRoot, function(localFilePath) {
@@ -235,7 +293,7 @@ var sppull = function() {
             if (!_self.options.muteConsole) {
                 readline.clearLine(process.stdout, 0);
                 readline.cursorTo(process.stdout, 0, null);
-                process.stdout.write("Folders proceeding: " + cntInQueue + " / " + foldersQueue.length + " (reqursive scanning...)");
+                process.stdout.write(colors.green.bold("Folders proceeding: ") + cntInQueue + " out of " + foldersQueue.length + " | files found: " + filesList.length + colors.gray(" [reqursive scanning...]"));
             }
 
             restOperations.getFolderContent(_self.context, spRootFolder, function(results) {
@@ -243,14 +301,14 @@ var sppull = function() {
                     var folderElement  = {
                         folder: folder,
                         serverRelativeUrl: folder.ServerRelativeUrl,
-                        processed: false // Otherwise some folders will be ignored when only structure is needed
+                        processed: false
                     };
-                    // folderElement.processed = (folder.ItemCount === 0);
                     foldersQueue.push(folderElement);
                 });
                 filesList = filesList.concat(results.files || []);
                 getStructureRecursive(foldersQueue, filesList, callback);
             });
+
         } else {
 
             if (!_self.options.muteConsole) {
@@ -315,9 +373,13 @@ var sppull = function() {
                     }
                 };
                 if (_self.options.createEmptyFolders) {
-                    createFoldersQueue(data.folders, 0, function() {
+                    if ((data.folders || []).length > 0) {
+                        createFoldersQueue(data.folders, 0, function() {
+                            downloadMyFilesHandler();
+                        });
+                    } else {
                         downloadMyFilesHandler();
-                    });
+                    }
                 } else {
                     downloadMyFilesHandler();
                 }
@@ -339,6 +401,30 @@ var sppull = function() {
             } else {
                 resolve([]);
             }
+        });
+    };
+    var runDownloadCamlObjects = function() {
+        return new Promise(function(resolve, reject) {
+            restOperations.getContentWithCaml(_self.context, _self.options.spDocLibUrl, _self.options.camlCondition, function(data) {
+                var downloadMyFilesHandler = function() {
+                    if ((data.files || []).length > 0) {
+                        downloadFilesQueue(data.files, 0, resolve);
+                    } else {
+                        resolve([]);
+                    }
+                };
+                if (_self.options.createEmptyFolders) {
+                    if ((data.folders || []).length > 0) {
+                        createFoldersQueue(data.folders, 0, function() {
+                            downloadMyFilesHandler();
+                        });
+                    } else {
+                        downloadMyFilesHandler();
+                    }
+                } else {
+                    downloadMyFilesHandler();
+                }
+            });
         });
     };
 
@@ -375,20 +461,26 @@ var sppull = function() {
             _self.options.muteConsole = false;
         }
 
-        if (typeof _self.options.strictObjects !== "undefined" && Array.isArray([_self.options.strictObjects])) {
+        // ====
 
-            return runDownloadStrictObjects();
+        if (typeof _self.options.camlCondition !== "undefined" && _self.options.camlCondition !== "" && typeof _self.options.spDocLibUrl !== "undefined" && _self.options.spDocLibUrl !== "") {
+
+            return runDownloadCamlObjects();
 
         } else {
 
-            if (!_self.options.foderStructureOnly) {
-                if (_self.options.recursive) {
-                    return runDownloadFilesRecursively();
-                } else {
-                    return runDownloadFilesFlat();
-                }
+            if (typeof _self.options.strictObjects !== "undefined" && Array.isArray([_self.options.strictObjects])) {
+                return runDownloadStrictObjects();
             } else {
-                return runCreateFoldersRecursively();
+                if (!_self.options.foderStructureOnly) {
+                    if (_self.options.recursive) {
+                        return runDownloadFilesRecursively();
+                    } else {
+                        return runDownloadFilesFlat();
+                    }
+                } else {
+                    return runCreateFoldersRecursively();
+                }
             }
 
         }
