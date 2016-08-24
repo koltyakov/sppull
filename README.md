@@ -31,9 +31,11 @@ sppull(context, options)
 #### Arguments:
 
 ##### Context:
-- `siteUrl` - SharePoint site (SPWeb) url, string, required
-- `username` - user name for SP authentication, string, required
-- `password` - password, string, required
+- `siteUrl` - SharePoint site (SPWeb) url [string, required]
+- `username` - user name for SP authentication [string, required]
+- `password` - password [string, required]
+- `domain` - domain name, for on-prem environments [string, optional]
+- `workstation` - workstation name, for rare case of dev on-prem environments [string, optional]
 
 ##### Options:
 - `spRootFolder` - root folder in SharePoint to pull from [string, required]

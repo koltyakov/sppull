@@ -19,6 +19,16 @@ var context = {
 };
 ```
 
+For on-prem installations sometimes you have to provide a domain name:
+```javascript
+var context = {
+    siteUrl: "http://sharepoint.contoso.com/subsite",
+    username: "user",
+    password: "_Password_",
+    domain: "CONTOSO"
+};
+```
+
 ## Basic usage
 ### Downloaded all files keeping target source folder structure
 ```javascript

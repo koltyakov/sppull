@@ -15,10 +15,17 @@ var sppull = function() {
     var RestOperations = function() {
         var _that = this;
         var getCachedRequest = function(ctx) {
+            var env = {};
+            if (ctx.hasOwnProperty("domain")) {
+                env.domain = ctx.domain;
+            }
+            if (ctx.hasOwnProperty("workstation")) {
+                env.workstation = ctx.workstation;
+            }
             if (JSON.stringify(ctxCached) === JSON.stringify(ctx)) {
-                spr = spr || require("sp-request").create(ctx);
+                spr = spr || require("sp-request").create(ctx, env);
             } else {
-                spr = require("sp-request").create(ctx);
+                spr = require("sp-request").create(ctx, env);
             }
             return spr;
         };
@@ -284,9 +291,13 @@ var sppull = function() {
                     }
                 };
                 if (_self.options.createEmptyFolders) {
-                    createFoldersQueue(data.folders, 0, function() {
+                    if ((data.folders || []).length > 0) {
+                        createFoldersQueue(data.folders, 0, function() {
+                            downloadMyFilesHandler();
+                        });
+                    } else {
                         downloadMyFilesHandler();
-                    });
+                    }
                 } else {
                     downloadMyFilesHandler();
                 }
