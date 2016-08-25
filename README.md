@@ -17,6 +17,10 @@ Node.js module for downloading files from SharePoint document libraries.
 ```bash
 npm install sppull --save-dev
 ```
+
+### Demo:
+![How it works](http://koltyakov.ru/images/sppull-demo.gif)
+
 ### Usage:
 ```javascript
 var sppull = require("sppull").sppull;
@@ -46,21 +50,21 @@ sppull(context, options)
 - `foderStructureOnly` - to ignore files, recreate only folders' structure [boolean, optional, default: `false`]
 - `excludeObjects` - array of files and folders relative paths within the `spRootFolder` to exclude from download process, [array of strings, optional]
 - `strictObjects` - array of files and folders relative paths within the `spRootFolder` to proceed explicitly, [array of strings, optional]
-- `restCondition` - SharePoint REST filter conditions to use [string, optional]
 - `camlCondition` - SharePoint CAML conditions to use [string, optional]
 - `spDocLibUrl` - SharePoint document library URL [string, mandatory with `restCondition`]
 - `metaFields` - array of internal field names to request along with the files [array of strings, optional]
 - `createEmptyFolders` - to create empty folders along with documents download task [boolean, optional, default: `true`]
 - `muteConsole` - to mute console messages during transport queries to SharePoint API [boolean, optional, default: `false`]
+<!--- `restCondition` - SharePoint REST filter conditions to use [string, optional]-->
 
-#### Overloads / cases (checked are implemented, unchecked will be soon):
+#### Overloads / cases:
 - [x] All files with folder structure from spRootFolder
 - [x] Files from spRootFolder folder, first hierarchy level only
 - [x] Folders structure from spRootFolder without files
 - [x] Files based on array of paths provided strictly [works with array of files only right now]
-- [ ] Files based on REST filters conditions
 - [x] Files based on CAML query conditions
 - [x] Pull for documents metadata to use it in callback's custom logic
+<!--- [ ] Files based on REST filters conditions-->
 
 Use case scenarios can be found on the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Scenarios.md) page. This page suggests combinations of options which are optimal for certain use cases.
 

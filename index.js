@@ -293,7 +293,8 @@ var sppull = function() {
             if (!_self.options.muteConsole) {
                 readline.clearLine(process.stdout, 0);
                 readline.cursorTo(process.stdout, 0, null);
-                process.stdout.write(colors.green.bold("Folders proceeding: ") + cntInQueue + " out of " + foldersQueue.length + " | files found: " + filesList.length + colors.gray(" [reqursive scanning...]"));
+                process.stdout.write(colors.green.bold("Folders proceeding: ") + cntInQueue + " out of " + foldersQueue.length + colors.gray(" [reqursive scanning...]"));
+                // " | files found: " + filesList.length +
             }
 
             restOperations.getFolderContent(_self.context, spRootFolder, function(results) {

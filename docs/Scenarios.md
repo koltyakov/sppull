@@ -108,6 +108,7 @@ var options = {
 };
 ```
 
+<!--
 ### Download files which correspond to a REST filter condition
 
 > Not implemented yet
@@ -121,6 +122,7 @@ var options = {
     restCondition: restFilters
 };
 ```
+-->
 
 ### Download files which correspond to a CAML condition
 
