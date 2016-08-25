@@ -51,7 +51,7 @@ sppull(context, options)
 - `excludeObjects` - array of files and folders relative paths within the `spRootFolder` to exclude from download process, [array of strings, optional]
 - `strictObjects` - array of files and folders relative paths within the `spRootFolder` to proceed explicitly, [array of strings, optional]
 - `camlCondition` - SharePoint CAML conditions to use [string, optional]
-- `spDocLibUrl` - SharePoint document library URL [string, mandatory with `restCondition`]
+- `spDocLibUrl` - SharePoint document library URL [string, mandatory with `camlCondition`]
 - `metaFields` - array of internal field names to request along with the files [array of strings, optional]
 - `createEmptyFolders` - to create empty folders along with documents download task [boolean, optional, default: `true`]
 - `muteConsole` - to mute console messages during transport queries to SharePoint API [boolean, optional, default: `false`]
