@@ -55,9 +55,6 @@ sppull(context, options)
 - `metaFields` - array of internal field names to request along with the files [array of strings, optional]
 - `createEmptyFolders` - to create empty folders along with documents download task [boolean, optional, default: `true`]
 - `muteConsole` - to mute console messages during transport queries to SharePoint API [boolean, optional, default: `false`]
-<!--
-`restCondition` - SharePoint REST filter conditions to use [string, optional]
--->
 
 #### Overloads / cases:
 - All files with folder structure from spRootFolder
@@ -66,7 +63,6 @@ sppull(context, options)
 - Files based on array of paths provided strictly [works with array of files only right now]
 - Files based on CAML query conditions
 - Pull for documents metadata to use it in callback's custom logic
-<!--[ ] Files based on REST filters conditions-->
 
 Use case scenarios can be found on the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Scenarios.md) page. This page suggests combinations of options which are optimal for certain use cases.
 
