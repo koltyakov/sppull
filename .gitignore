@@ -1,4 +1,3 @@
 node_modules
-LocalTests
-experimental
-Downloads
+downloads
+test/config/config.js

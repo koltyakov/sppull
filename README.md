@@ -48,7 +48,6 @@ sppull(context, options)
 - `recursive` - to pull all files and folders recursively [boolean, optional, default: `true`]
 - `ignoreEmptyFolders` - to ignore local creation of SharePoint empty folders [boolean, optional, default: `true`]
 - `foderStructureOnly` - to ignore files, recreate only folders' structure [boolean, optional, default: `false`]
-- `excludeObjects` - array of files and folders relative paths within the `spRootFolder` to exclude from download process, [array of strings, optional]
 - `strictObjects` - array of files and folders relative paths within the `spRootFolder` to proceed explicitly, [array of strings, optional]
 - `camlCondition` - SharePoint CAML conditions to use [string, optional]
 - `spDocLibUrl` - SharePoint document library URL [string, mandatory with `camlCondition`]
@@ -86,7 +85,7 @@ var context = {
 };
 
 var options = {
-    spRootFolder: "/subsite/Shared%20Documents/Contracts",
+    spRootFolder: "Shared%20Documents/Contracts",
     dlRootFolder: "./Downloads/Contracts"
 };
 

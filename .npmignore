@@ -1,4 +1,5 @@
-node_modules
-LocalTests
-experimental
-Downloads
+downloads
+test
+.vscode
+typings
+test/config/config.js

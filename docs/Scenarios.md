@@ -41,7 +41,7 @@ var context = {
 };
 
 var options = {
-    spRootFolder: "/subsite/Shared%20Documents/Contracts",
+    spRootFolder: "Shared%20Documents/Contracts",
     dlRootFolder: "./Downloads/Contracts"
 };
 
@@ -60,7 +60,7 @@ Actually if you know options parameters you know all sppull, at least by now.
 ### Downloaded files from target source folder explicitly
 ```javascript
 var options = {
-    spRootFolder: "/subsite/Shared%20Documents/Contracts",
+    spRootFolder: "Shared%20Documents/Contracts",
     dlRootFolder: "./Downloads/Contracts",
     recursive: false
 };
@@ -69,7 +69,7 @@ var options = {
 ### Recreate locally folders' structure from SharePoint target
 ```javascript
 var options = {
-    spRootFolder: "/subsite/Shared%20Documents/Contracts",
+    spRootFolder: "Shared%20Documents/Contracts",
     dlRootFolder: "./Downloads/Contracts",
     foderStructureOnly: false
 };
@@ -81,7 +81,7 @@ var options = {
 
 ```javascript
 var options = {
-    spRootFolder: "/subsite/_catalogs/masterpage",
+    spRootFolder: "_catalogs/masterpage",
     dlRootFolder: "./Downloads/Assets",
     strictObjects: [
         "/Display%20Templates/Search", // All files and folders under /subsite/_catalogs/masterpage/Display Templates/Search folder
@@ -92,13 +92,16 @@ var options = {
 ```
 If a file is sitting within explicitly provided folder, folder settings will be used, as a file setting is a subset of it's parent.
 
+
+<!--
+excludeObjects - array of files and folders relative paths within the `spRootFolder` to exclude from download process, [array of strings, optional]
 ### Download files from spRootFolder ignoring some folders and files
 
 > Not implemented yet
 
 ```javascript
 var options = {
-    spRootFolder: "/subsite/_catalogs/masterpage",
+    spRootFolder: "_catalogs/masterpage",
     dlRootFolder: "./Downloads/Assets",
     excludeObjects: [
         "/Display%20Templates/Search",
@@ -107,8 +110,6 @@ var options = {
     ]
 };
 ```
-
-<!--
 ### Download files which correspond to a REST filter condition
 
 > Not implemented yet
@@ -134,8 +135,8 @@ var camlString = "<Eq>" +
                  "</Eq>";
 var options = {
     dlRootFolder: "./Downloads/Contracts",
-    spBaseFolder: "/subsite/Shared%20Documents/Contracts", // To avoid redundant folder structure in download folder
-    spDocLibUrl: "/subsite/Shared%20Documents", // Mandatory in this scenario
+    spBaseFolder: "Shared%20Documents/Contracts", // To avoid redundant folder structure in download folder
+    spDocLibUrl: "Shared%20Documents", // Mandatory in this scenario
     camlCondition: camlString
 };
 ```
@@ -146,7 +147,7 @@ var options = {
 
 ```javascript
 var options = {
-    spRootFolder: "/subsite/Shared%20Documents/Contracts",
+    spRootFolder: "Shared%20Documents/Contracts",
     dlRootFolder: "./Downloads/Contracts",
     metaFields: [
         "Title",

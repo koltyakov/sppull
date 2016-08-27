@@ -1,7 +1,9 @@
-// Place your settings in this file to overwrite default and user settings.
 {
     "editor.tabCompletion": true,
     "editor.renderWhitespace": true,
     "editor.renderControlCharacters": true,
-    "editor.renderIndentGuides": true
+    "editor.renderIndentGuides": true,
+    "files.exclude": {
+        "node_modules/": false
+    }
 }
