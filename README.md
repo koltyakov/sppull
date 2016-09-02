@@ -3,6 +3,7 @@
 [![NPM](https://nodei.co/npm/sppull.png?mini=true)](https://nodei.co/npm/sppull/)
 
 [![npm version](https://badge.fury.io/js/sppull.svg)](https://badge.fury.io/js/sppull)
+[![Downloads](https://img.shields.io/npm/dm/sppull.svg)](https://www.npmjs.com/package/sppull)
 
 Node.js module for downloading files from SharePoint document libraries.
 
