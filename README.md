@@ -1,6 +1,6 @@
 # SPPull - simple client to pull and download files from SharePoint
 
-[![NPM](https://nodei.co/npm/sppull.png?mini=true)](https://nodei.co/npm/sppull/)
+[![NPM](https://nodei.co/npm/sppull.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/sppull/)
 
 [![npm version](https://badge.fury.io/js/sppull.svg)](https://badge.fury.io/js/sppull)
 [![Downloads](https://img.shields.io/npm/dm/sppull.svg)](https://www.npmjs.com/package/sppull)
