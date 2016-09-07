@@ -1,3 +1,4 @@
 node_modules
 downloads
 test/config/config.js
+test/config/config.json

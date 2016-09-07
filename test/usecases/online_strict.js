@@ -1,34 +1,40 @@
 // node ./test/usecases/online_strict.js
 
 var sppull = require("./../../lib/src/index").sppull;
-var config = require("./../config/config");
 var utils = require("./../utils/utils");
 var colors = require("colors");
 
-var context = {
-    siteUrl: config.online.siteUrl,
-    username: config.online.username,
-    password: config.online.password
-};
+var configPath = "test/config/config.json";
+var envType = "online";
 
-var options = {
-    spRootFolder: "_catalogs/masterpage",
-    dlRootFolder: "./downloads/online",
-    strictObjects: [
-        "seattle.master",
-        "/oslo.master",
-        "v4.master"
-    ]
-};
+utils.initConfig(envType, configPath, function(config) {
 
-utils.deleteFolderRecursive(options.dlRootFolder);
+    var context = {
+        siteUrl: config.siteUrl,
+        username: config.username,
+        password: config.password
+    };
 
-console.log(colors.yellow("\n=== Online - Basic ===\n"));
+    var options = {
+        spRootFolder: "_catalogs/masterpage",
+        dlRootFolder: "./downloads/online",
+        strictObjects: [
+            "seattle.master",
+            "/oslo.master",
+            "v4.master"
+        ]
+    };
 
-sppull(context, options)
-    .then(function(data) {
-        console.log(colors.green("\n=== Finished ===\n"));
-    })
-    .catch(function(err) {
-        console.log(colors.red(err));
-    });
+    // utils.deleteFolderRecursive(options.dlRootFolder);
+
+    console.log(colors.yellow("\n=== Online - Strinct objects ===\n"));
+
+    sppull(context, options)
+        .then(function(data) {
+            console.log(colors.green("\n=== Finished ===\n"));
+        })
+        .catch(function(err) {
+            console.log(colors.red(err));
+        });
+
+});
