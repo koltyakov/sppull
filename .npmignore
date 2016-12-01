@@ -3,3 +3,4 @@ test
 .vscode
 typings
 test/config/config.js
+docs

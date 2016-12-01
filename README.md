@@ -108,7 +108,7 @@ var sppull = require("sppull").sppull;
 var context = {
     siteUrl: "http://contoso.sharepoint.com/subsite",
     username: "user@contoso.com",
-    password: "_Password_"  
+    password: "_Password_"
 };
 
 var options = {
