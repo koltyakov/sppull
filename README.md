@@ -80,6 +80,7 @@ For more information please check node-sp-auth [credential options](https://gith
 - `spDocLibUrl` - SharePoint document library URL [string, mandatory with `camlCondition`]
 - `metaFields` - array of internal field names to request along with the files [array of strings, optional]
 - `createEmptyFolders` - to create empty folders along with documents download task [boolean, optional, default: `true`]
+- `omitFolderPath` - folder path pattern which is omitted from final downloaded files path [string, optional]
 - `muteConsole` - to mute console messages during transport queries to SharePoint API [boolean, optional, default: `false`]
 
 #### Overloads / cases:
