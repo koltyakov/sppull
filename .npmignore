@@ -1,6 +1,8 @@
-downloads
-test
 .vscode
-typings
-test/config/config.js
-docs
+downloads
+/test
+/config/private.json
+npm-debug.log
+/src
+/docs
+!/dist

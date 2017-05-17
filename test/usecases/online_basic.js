@@ -1,35 +1,37 @@
 // node ./test/usecases/online_basic.js
 
-var sppull = require("./../../lib/src/index").sppull;
-var utils = require("./../utils/utils");
-var colors = require("colors");
+let cpass = new (require('cpass'))();
+let colors = require('colors');
 
-var configPath = "test/config/config.json";
-var envType = "online";
+let sppull = require('./../../dist').sppull;
+let utils = require('./../utils/utils');
 
-utils.initConfig(envType, configPath, function(config) {
+let configPath = './../config/private.json';
+let envType = 'online';
 
-    var context = {
-        siteUrl: config.siteUrl,
+let config = require(configPath)[envType];
+
+let context = {
+    siteUrl: config.siteUrl,
+    creds: {
         username: config.username,
-        password: config.password
-    };
+        password: cpass.decode(config.password)
+    }
+};
 
-    var options = {
-        spRootFolder: "_catalogs/masterpage",
-        dlRootFolder: "./downloads/online"
-    };
+let options = {
+    spRootFolder: '_catalogs/masterpage',
+    dlRootFolder: './downloads/online'
+};
 
-    // utils.deleteFolderRecursive(options.dlRootFolder);
+// utils.deleteFolderRecursive(options.dlRootFolder);
 
-    console.log(colors.yellow("\n=== Online - Basic ===\n"));
+console.log(colors.yellow('\n=== Online - Basic ===\n'));
 
-    sppull(context, options)
-        .then(function(data) {
-            console.log(colors.green("\n=== Finished ===\n"));
-        })
-        .catch(function(err) {
-            console.log(colors.red(err));
-        });
-
-});
+sppull(context, options)
+    .then((data) => {
+        console.log(colors.green('\n=== Finished ===\n'));
+    })
+    .catch((err) => {
+        console.log(colors.red(err));
+    });

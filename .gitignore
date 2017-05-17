@@ -1,5 +1,7 @@
 node_modules
-downloads
-test/config/config.js
-test/config/config.json
+/dist
+/downloads
+/test/config/private.js
+/test/config/private.json
 npm-debug.log
+.vscode
