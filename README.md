@@ -37,8 +37,10 @@ sppull(context, options)
 
 ##### Context:
 - `siteUrl` - SharePoint site (SPWeb) url [string, required]
-- `username` - user name for SP authentication [string, optional in case of some auth methods]
-- `password` - password [string, optional in case of some auth methods]
+- `creds`
+  - `username` - user name for SP authentication [string, optional in case of some auth methods]
+  - `password` - password [string, optional in case of some auth methods]
+  ...
 
 **Additional authentication options:**
 
@@ -108,8 +110,10 @@ var sppull = require("sppull").sppull;
 
 var context = {
     siteUrl: "http://contoso.sharepoint.com/subsite",
-    username: "user@contoso.com",
-    password: "_Password_"
+    creds: {
+        username: "user@contoso.com",
+        password: "_Password_"
+    }
 };
 
 var options = {

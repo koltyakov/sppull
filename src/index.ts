@@ -23,6 +23,12 @@ export class Download {
         this.context = context;
         this.options = options;
 
+        if (typeof this.context.creds === 'undefined') {
+            this.context.creds = {
+                ...(this.context as any)
+            };
+        }
+
         this.options.spHostName = this.context.siteUrl
             .replace('http://', '')
             .replace('https://', '')
