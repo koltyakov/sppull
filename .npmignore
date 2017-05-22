@@ -7,8 +7,9 @@
 /docs
 .vscode
 npm-debug.log
-gulpfile.json
-README.md
+gulpfile.js
 tsconfig.json
 tslint.json
 yarn.lock
+jsconfig.json
+.npmignore
