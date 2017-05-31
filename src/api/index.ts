@@ -4,7 +4,6 @@ import * as mkdirp from 'mkdirp';
 import * as colors from 'colors';
 import * as readline from 'readline';
 import * as sprequest from 'sp-request';
-import * as Promise from 'bluebird';
 
 import { ISPPullOptions, ISPPullContext } from '../interfaces';
 

@@ -1,6 +1,6 @@
 // node ./test/usecases/online_strict.js
 
-let cpass = new (require('cpass'))();
+let cpass = new (require('cpass')).Cpass();
 let colors = require('colors');
 
 let sppull = require('./../../dist').sppull;

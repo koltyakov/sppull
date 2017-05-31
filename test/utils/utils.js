@@ -1,5 +1,4 @@
 var fs = require('fs');
-var prompt = require("prompt");
 
 var spf = spf || {};
 spf.utils = spf.utils || {};

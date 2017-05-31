@@ -1,6 +1,6 @@
 // node ./test/usecases/onprem_basic.js
 
-let cpass = new (require('cpass'))();
+let cpass = new (require('cpass')).Cpass();
 let colors = require('colors');
 
 let sppull = require('./../../dist').sppull;

@@ -3,7 +3,6 @@ import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import * as colors from 'colors';
 import * as readline from 'readline';
-import * as Promise from 'bluebird';
 
 import RestAPI from './api';
 import { ISPPullOptions, ISPPullContext } from './interfaces';
@@ -14,11 +13,7 @@ export class Download {
     private options: ISPPullOptions;
     private restApi: RestAPI;
 
-    constructor() {
-        //
-    }
-
-    public sppull = (context: ISPPullContext, options: ISPPullOptions) => {
+    public sppull = (context: ISPPullContext, options: ISPPullOptions): Promise<any> => {
 
         this.context = context;
         this.options = options;
@@ -267,7 +262,7 @@ export class Download {
         });
     }
 
-    private downloadMyFilesHandler = (data) => {
+    private downloadMyFilesHandler = (data): Promise<any> => {
         return new Promise((resolve, reject) => {
             if ((data.files || []).length > 0) {
                 resolve(this.downloadFilesQueue(data.files, 0));
@@ -316,7 +311,7 @@ export class Download {
             });
     }
 
-    private runDownloadStrictObjects = () => {
+    private runDownloadStrictObjects = (): Promise<any> => {
         return new Promise((resolve, reject) => {
             let filesList = this.options.strictObjects.filter((d) => {
                 let pathArr = d.split('/');
@@ -334,7 +329,7 @@ export class Download {
         });
     }
 
-    private runDownloadCamlObjects = () => {
+    private runDownloadCamlObjects = (): Promise<any> => {
         return this.restApi.getContentWithCaml()
             .then((data) => {
                 if (this.options.createEmptyFolders) {
