@@ -5,6 +5,7 @@
 /config/private.json
 /src
 /docs
+/examples
 .vscode
 npm-debug.log
 gulpfile.js

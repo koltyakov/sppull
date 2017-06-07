@@ -351,5 +351,7 @@ export class Download {
 
 }
 
+export { ISPPullOptions, ISPPullContext } from './interfaces';
+
 const sppull = new Download();
 module.exports = sppull;

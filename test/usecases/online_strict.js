@@ -31,7 +31,7 @@ let options = {
 
 // utils.deleteFolderRecursive(options.dlRootFolder);
 
-console.log(colors.yellow('\n=== Online - Strinct objects ===\n'));
+console.log(colors.yellow('\n=== Online - Strict objects ===\n'));
 
 sppull(context, options)
     .then((data) => {

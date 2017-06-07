@@ -1,0 +1,22 @@
+{
+  "name": "basic",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "download": "ts-node ./src/index"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "node-sp-auth-config": "^2.0.1",
+    "sppull": "^2.0.4"
+  },
+  "devDependencies": {
+    "@types/node": "^6.0.73",
+    "ts-node": "^3.0.4",
+    "tslint": "^5.2.0",
+    "typescript": "^2.3.2"
+  }
+}

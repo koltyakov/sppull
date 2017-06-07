@@ -1,0 +1,4 @@
+node_modules
+Downloads
+config/**/private.json
+config/**/private.*.json
