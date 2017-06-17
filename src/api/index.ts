@@ -5,7 +5,7 @@ import * as colors from 'colors';
 import * as readline from 'readline';
 import * as sprequest from 'sp-request';
 
-import { ISPPullOptions, ISPPullContext } from '../interfaces';
+import { ISPPullOptions, ISPPullContext, IFileBasicMetadata } from '../interfaces';
 
 export default class RestAPI {
 
@@ -22,45 +22,75 @@ export default class RestAPI {
         };
     }
 
-    public downloadFile = (spFilePath): Promise<any> => {
+    public downloadFile = (spFilePath: string, metadata?: IFileBasicMetadata): Promise<any> => {
         return new Promise((resolve, reject) => {
             this.spr = this.getCachedRequest();
             let restUrl: string = this.context.siteUrl +
                 '/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/OpenBinaryStream' +
                 '?@FileServerRelativeUrl=\'' + encodeURIComponent(spFilePath) + '\'';
 
-            this.spr.get(restUrl, { encoding: null })
-                .then((response) => {
-                    let saveFilePath = path.join(
-                        this.options.dlRootFolder,
-                        decodeURIComponent(spFilePath).replace(decodeURIComponent(this.options.spBaseFolder), '')
-                    );
+            let saveFilePath = path.join(
+                this.options.dlRootFolder,
+                decodeURIComponent(spFilePath).replace(decodeURIComponent(this.options.spBaseFolder), '')
+            );
 
-                    if (typeof this.options.omitFolderPath !== 'undefined') {
-                        let omitFolderPath = path.resolve(this.options.omitFolderPath);
-                        saveFilePath = path.join(saveFilePath.replace(this.options.omitFolderPath, ''));
-                    }
+            if (typeof this.options.omitFolderPath !== 'undefined') {
+                let omitFolderPath = path.resolve(this.options.omitFolderPath);
+                saveFilePath = path.join(saveFilePath.replace(this.options.omitFolderPath, ''));
+            }
 
-                    let saveFolderPath = path.dirname(saveFilePath);
-                    if (/.json$/.test(saveFilePath)) {
-                        response.body = JSON.stringify(response.body, null, 2);
+            let stats: fs.Stats = null;
+            let needDownload: boolean = true;
+
+            if (typeof metadata !== 'undefined') {
+                if (fs.existsSync(saveFilePath)) {
+                    stats = fs.statSync(saveFilePath);
+                    needDownload = false;
+                    if (typeof metadata.Length !== 'undefined') {
+                        // tslint:disable-next-line:radix
+                        if (stats.size !== parseInt(metadata.Length + '')) {
+                            needDownload = true;
+                        }
+                    } else {
+                        needDownload = true;
                     }
-                    if (/.map$/.test(saveFilePath)) {
-                        response.body = JSON.stringify(response.body);
+                    if (typeof metadata.TimeLastModified !== 'undefined') {
+                        let timeLastModified = new Date(metadata.TimeLastModified);
+                        if (stats.mtime < timeLastModified) {
+                            needDownload = true;
+                        }
                     }
-                    mkdirp(saveFolderPath, (err) => {
-                        if (err) { reject(err); }
-                        // tslint:disable-next-line:no-shadowed-variable
-                        fs.writeFile(saveFilePath, response.body, (err) => {
+                } else {
+                    needDownload = true;
+                }
+            }
+
+            if (needDownload) {
+                this.spr.get(restUrl, { encoding: null })
+                    .then((response) => {
+                        let saveFolderPath = path.dirname(saveFilePath);
+                        if (/.json$/.test(saveFilePath)) {
+                            response.body = JSON.stringify(response.body, null, 2);
+                        }
+                        if (/.map$/.test(saveFilePath)) {
+                            response.body = JSON.stringify(response.body);
+                        }
+                        mkdirp(saveFolderPath, (err) => {
                             if (err) { reject(err); }
-                            resolve(saveFilePath);
+                            // tslint:disable-next-line:no-shadowed-variable
+                            fs.writeFile(saveFilePath, response.body, (err) => {
+                                if (err) { reject(err); }
+                                resolve(saveFilePath);
+                            });
                         });
+                    })
+                    .catch((err) => {
+                        console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err.message));
+                        reject(err.message);
                     });
-                })
-                .catch((err) => {
-                    console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err.message));
-                    reject(err.message);
-                });
+            } else {
+                resolve(saveFilePath);
+            }
         });
     }
 
@@ -76,8 +106,8 @@ export default class RestAPI {
             restUrl = this.context.siteUrl + '/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)' +
                         '?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields' +
                         '&$select=##MetadataSrt#' +
-                        'Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeModified,' +
-                        'Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeModified,Files/ModifiedBy' +
+                        'Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,' +
+                        'Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeLastModified,Files/ModifiedBy' +
                         '&@FolderServerRelativeUrl=\'' + encodeURIComponent(spRootFolder) + '\'';
 
             let metadataStr: string = this.options.metaFields.map((fieldName) => {
@@ -126,7 +156,7 @@ export default class RestAPI {
                     restUrl = this.context.siteUrl + '/_api/Web/GetList(@DocLibUrl)/GetItems' +
                             '?$select=' +
                                 '##MetadataSrt#' +
-                                'Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeModified,Length,ModifiedBy' +
+                                'Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeLastModified,Length,ModifiedBy' +
                             '&@DocLibUrl=\'' + encodeURIComponent(this.options.spDocLibUrl) + '\'';
 
                     let metadataStr: string = this.options.metaFields.map((fieldName) => {

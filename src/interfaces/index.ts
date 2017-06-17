@@ -1,5 +1,16 @@
 import { IAuthOptions } from 'node-sp-auth';
 
+export interface IFileBasicMetadata {
+    ServerRelativeUrl: string;
+    Name?: string;
+    UniqueID?: string;
+    ID?: string;
+    Length?: number;
+    TimeCreated?: string;
+    TimeLastModified?: string;
+    SavedToLocalPath?: string;
+}
+
 export interface ISPPullContext {
     siteUrl: string;
     creds: IAuthOptions;

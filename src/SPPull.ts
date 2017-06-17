@@ -6,6 +6,7 @@ import * as readline from 'readline';
 
 import RestAPI from './api';
 import { ISPPullOptions, ISPPullContext } from './interfaces';
+import { IFileBasicMetadata } from './interfaces';
 
 export class Download {
 
@@ -155,7 +156,7 @@ export class Download {
         });
     }
 
-    private downloadFilesQueue = (filesList: any[], index: number = 0): Promise<any> => {
+    private downloadFilesQueue = (filesList: IFileBasicMetadata[], index: number = 0): Promise<any> => {
         return new Promise((resolve, reject) => {
             let spFilePath = filesList[index].ServerRelativeUrl;
             if (!this.options.muteConsole) {
@@ -163,7 +164,10 @@ export class Download {
                 readline.cursorTo(process.stdout, 0, null);
                 process.stdout.write(colors.green.bold('Downloading files: ') + (index + 1) + ' out of ' + filesList.length);
             }
-            this.restApi.downloadFile(spFilePath)
+
+            // console.log(filesList[index]);
+
+            this.restApi.downloadFile(spFilePath, filesList[index])
                 .then((localFilePath) => {
                     filesList[index].SavedToLocalPath = localFilePath;
                     index += 1;
@@ -313,7 +317,7 @@ export class Download {
 
     private runDownloadStrictObjects = (): Promise<any> => {
         return new Promise((resolve, reject) => {
-            let filesList = this.options.strictObjects.filter((d) => {
+            let filesList: IFileBasicMetadata[] = this.options.strictObjects.filter((d) => {
                 let pathArr = d.split('/');
                 return pathArr[pathArr.length - 1].indexOf('.') !== -1;
             }).map(function(d) {
