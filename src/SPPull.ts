@@ -75,6 +75,17 @@ export class Download {
             this.options.restCondition = '';
         }
 
+        if (this.options.spDocLibUrl) {
+            if (this.options.spDocLibUrl.indexOf(this.options.spRelativeBase) !== 0) {
+                this.options.spDocLibUrl = (this.options.spRelativeBase + '/' + this.options.spDocLibUrl).replace(/\/\//g, '/');
+            } else {
+                if (this.options.spDocLibUrl.charAt(0) !== '/') {
+                    this.options.spDocLibUrl = '/' + this.options.spDocLibUrl;
+                }
+            }
+            this.options.spDocLibUrl = encodeURIComponent(this.options.spDocLibUrl);
+        }
+
         if (typeof this.options.muteConsole === 'undefined') {
             this.options.muteConsole = false;
         }
@@ -164,9 +175,6 @@ export class Download {
                 readline.cursorTo(process.stdout, 0, null);
                 process.stdout.write(colors.green.bold('Downloading files: ') + (index + 1) + ' out of ' + filesList.length);
             }
-
-            // console.log(filesList[index]);
-
             this.restApi.downloadFile(spFilePath, filesList[index])
                 .then((localFilePath) => {
                     filesList[index].SavedToLocalPath = localFilePath;

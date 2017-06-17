@@ -175,13 +175,13 @@ export default class RestAPI {
                                 __metadata: {
                                     type: 'SP.CamlQuery'
                                 },
-                                ViewXml: '<View Scope=\'Recursive\'><Query><Where>' + this.options.camlCondition + '</Where></Query></View>'
+                                ViewXml: `<View Scope="Recursive"><Query><Where>${this.options.camlCondition}</Where></Query></View>`
                             }
                         },
                         headers: {
                             'X-RequestDigest': digest,
-                            'accept': 'application/json; odata=verbose',
-                            'content-type': 'application/json; odata=verbose'
+                            'Accept': 'application/json; odata=verbose',
+                            'Content-Type': 'application/json; odata=verbose'
                         }
                     });
                 })
