@@ -106,6 +106,7 @@ export default class RestAPI {
             restUrl = this.context.siteUrl + '/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)' +
                         '?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields' +
                         '&$select=##MetadataSrt#' +
+                        'Folders/ListItemAllFields/Id,' +
                         'Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,' +
                         'Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeLastModified,Files/ModifiedBy' +
                         '&@FolderServerRelativeUrl=\'' + encodeURIComponent(spRootFolder) + '\'';
@@ -123,7 +124,9 @@ export default class RestAPI {
             this.spr.get(restUrl)
                 .then((response: any) => {
                     let results = {
-                        folders: response.body.d.Folders.results || [],
+                        folders: (response.body.d.Folders.results || []).filter((folder) => {
+                            return typeof folder.ListItemAllFields.Id !== 'undefined';
+                        }),
                         files: (response.body.d.Files.results || []).map((file) => {
                             return {
                                 ...file,
