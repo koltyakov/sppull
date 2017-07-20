@@ -191,16 +191,17 @@ export class Download {
         });
     }
 
-    private getStructureRecursive = (foldersQueue: any[] = [], filesList: any[] = []): Promise<any> => {
+    private getStructureRecursive = (root: boolean = true, foldersQueue: any[] = [], filesList: any[] = []): Promise<any> => {
         return new Promise((resolve, reject) => {
             let exitQueue = true;
             if (typeof this.options.spRootFolder === 'undefined' || this.options.spRootFolder === '') {
                 reject('The `spRootFolder` property should be provided in options.');
             }
             let spRootFolder;
+
             if (foldersQueue.length === 0) {
                 spRootFolder = this.options.spRootFolder;
-                exitQueue = false;
+                exitQueue = !root; // false;
             } else {
                 foldersQueue.some((fi) => {
                     if (typeof fi.processed === 'undefined') {
@@ -215,9 +216,10 @@ export class Download {
                     return false;
                 });
             }
+
             if (!exitQueue) {
                 let cntInQueue = 0;
-                foldersQueue.forEach(function(folder) {
+                foldersQueue.forEach((folder) => {
                     if (folder.processed) {
                         cntInQueue += 1;
                     }
@@ -231,7 +233,7 @@ export class Download {
 
                 this.restApi.getFolderContent(spRootFolder)
                     .then((results) => {
-                        (results.folders || []).forEach(function(folder) {
+                        (results.folders || []).forEach((folder) => {
                             let folderElement = {
                                 folder: folder,
                                 serverRelativeUrl: folder.ServerRelativeUrl,
@@ -240,14 +242,14 @@ export class Download {
                             foldersQueue.push(folderElement);
                         });
                         filesList = filesList.concat(results.files || []);
-                        resolve(this.getStructureRecursive(foldersQueue, filesList));
+                        resolve(this.getStructureRecursive(false, foldersQueue, filesList));
                     });
 
             } else {
                 if (!this.options.muteConsole) {
                     process.stdout.write('\n');
                 }
-                let foldersList = foldersQueue.map(function(folder) {
+                let foldersList = foldersQueue.map((folder) => {
                     return folder.folder;
                 });
                 resolve({
@@ -328,7 +330,7 @@ export class Download {
             let filesList: IFileBasicMetadata[] = this.options.strictObjects.filter((d) => {
                 let pathArr = d.split('/');
                 return pathArr[pathArr.length - 1].indexOf('.') !== -1;
-            }).map(function(d) {
+            }).map((d) => {
                 return {
                     ServerRelativeUrl: d
                 };
