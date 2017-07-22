@@ -7,6 +7,14 @@
 
 Node.js module for downloading files from SharePoint document libraries.
 
+## New in version 2.1.0
+
+Performance in SPO and HTTPS environments is improved. Download on multiple objects is x2 faster now!
+
+## New in version 2.0.6
+
+Smart re-download mechanism. Existing files with no changes are ignored from the download.
+
 ## Supported SharePoint versions:
 - SharePoint Online
 - SharePoint 2013
