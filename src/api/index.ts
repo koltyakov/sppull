@@ -1,10 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as https from 'https';
 import * as mkdirp from 'mkdirp';
 import * as colors from 'colors';
 import * as readline from 'readline';
 import * as sprequest from 'sp-request';
 
+import { Utils } from './../utils';
 import { ISPPullOptions, ISPPullContext, IFileBasicMetadata } from '../interfaces';
 
 export default class RestAPI {
@@ -12,6 +14,8 @@ export default class RestAPI {
     private context: ISPPullContext;
     private options: ISPPullOptions;
     private spr: sprequest.ISPRequest;
+    private agent: https.Agent;
+    private utils: Utils;
 
     constructor(context: ISPPullContext, options: ISPPullOptions) {
         this.context = context;
@@ -20,6 +24,12 @@ export default class RestAPI {
             dlRootFolder: options.dlRootFolder || '.downloads',
             metaFields: options.metaFields || []
         };
+        this.utils = new Utils();
+        this.agent = new https.Agent({
+            rejectUnauthorized: false,
+            keepAlive: true,
+            keepAliveMsecs: 10000
+        });
     }
 
     public downloadFile = (spFilePath: string, metadata?: IFileBasicMetadata): Promise<any> => {
@@ -66,7 +76,10 @@ export default class RestAPI {
             }
 
             if (needDownload) {
-                this.spr.get(restUrl, { encoding: null })
+                this.spr.get(restUrl, {
+                    encoding: null,
+                    agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
+                })
                     .then((response) => {
                         let saveFolderPath = path.dirname(saveFilePath);
                         if (/.json$/.test(saveFilePath)) {
@@ -121,7 +134,9 @@ export default class RestAPI {
 
             restUrl = restUrl.replace(/##MetadataSrt#/g, metadataStr);
 
-            this.spr.get(restUrl)
+            this.spr.get(restUrl, {
+                agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
+            })
                 .then((response: any) => {
                     let results = {
                         folders: (response.body.d.Folders.results || []).filter((folder) => {
@@ -185,7 +200,8 @@ export default class RestAPI {
                             'X-RequestDigest': digest,
                             'Accept': 'application/json; odata=verbose',
                             'Content-Type': 'application/json; odata=verbose'
-                        }
+                        },
+                        agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
                     });
                 })
                 .then((response) => {
