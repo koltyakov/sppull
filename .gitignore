@@ -1,6 +1,6 @@
 node_modules
-test/config/**/private.json
-test/config/**/private.*.json
+config/**/private.json
+config/**/private.*.json
 debug.log
 npm-debug.*
 downloads
