@@ -5,6 +5,10 @@
 [![npm version](https://badge.fury.io/js/sppull.svg)](https://badge.fury.io/js/sppull)
 [![Downloads](https://img.shields.io/npm/dm/sppull.svg)](https://www.npmjs.com/package/sppull)
 
+---
+### Need help on SharePoint with Node.js? Join our gitter chat and ask question! [![Gitter chat](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/sharepoint-node/Lobby)
+---
+
 Node.js module for downloading files from SharePoint document libraries.
 
 ## New in version 2.1.0
