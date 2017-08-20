@@ -11,6 +11,12 @@
 
 Node.js module for downloading files from SharePoint document libraries.
 
+## New in version 2.2.0
+
+Files streaming download:
+- Download files of any supported size
+- Effective memmory consumption while fetching large files
+
 ## New in version 2.1.0
 
 Performance in SPO and HTTPS environments is improved. Download on multiple objects is x2 faster now!

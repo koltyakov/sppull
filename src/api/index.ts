@@ -5,6 +5,9 @@ import * as mkdirp from 'mkdirp';
 import * as colors from 'colors';
 import * as readline from 'readline';
 import * as sprequest from 'sp-request';
+import * as request from 'request';
+import { OptionsWithUrl } from 'request';
+import { getAuth, IAuthOptions } from 'node-sp-auth';
 
 import { Utils } from './../utils';
 import { ISPPullOptions, ISPPullContext, IFileBasicMetadata } from '../interfaces';
@@ -35,9 +38,6 @@ export default class RestAPI {
     public downloadFile = (spFilePath: string, metadata?: IFileBasicMetadata): Promise<any> => {
         return new Promise((resolve, reject) => {
             this.spr = this.getCachedRequest();
-            let restUrl: string = this.context.siteUrl +
-                '/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/OpenBinaryStream' +
-                '?@FileServerRelativeUrl=\'' + encodeURIComponent(spFilePath) + '\'';
 
             let saveFilePath = path.join(
                 this.options.dlRootFolder,
@@ -49,58 +49,56 @@ export default class RestAPI {
                 saveFilePath = path.join(saveFilePath.replace(this.options.omitFolderPath, ''));
             }
 
-            let stats: fs.Stats = null;
-            let needDownload: boolean = true;
+            if (this.needToDownload(saveFilePath, metadata)) {
 
-            if (typeof metadata !== 'undefined') {
-                if (fs.existsSync(saveFilePath)) {
-                    stats = fs.statSync(saveFilePath);
-                    needDownload = false;
-                    if (typeof metadata.Length !== 'undefined') {
-                        // tslint:disable-next-line:radix
-                        if (stats.size !== parseInt(metadata.Length + '')) {
-                            needDownload = true;
-                        }
-                    } else {
-                        needDownload = true;
-                    }
-                    if (typeof metadata.TimeLastModified !== 'undefined') {
-                        let timeLastModified = new Date(metadata.TimeLastModified);
-                        if (stats.mtime < timeLastModified) {
-                            needDownload = true;
-                        }
-                    }
-                } else {
-                    needDownload = true;
-                }
-            }
+                let saveFolderPath = path.dirname(saveFilePath);
 
-            if (needDownload) {
-                this.spr.get(restUrl, {
-                    encoding: null,
-                    agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
-                })
-                    .then((response) => {
-                        let saveFolderPath = path.dirname(saveFilePath);
-                        if (/.json$/.test(saveFilePath)) {
-                            response.body = JSON.stringify(response.body, null, 2);
-                        }
-                        if (/.map$/.test(saveFilePath)) {
-                            response.body = JSON.stringify(response.body);
-                        }
-                        mkdirp(saveFolderPath, (err) => {
-                            if (err) { reject(err); }
-                            // tslint:disable-next-line:no-shadowed-variable
-                            fs.writeFile(saveFilePath, response.body, (err) => {
-                                if (err) { reject(err); }
+                mkdirp(saveFolderPath, err => {
+                    if (err) {
+                        console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err));
+                        return reject(err);
+                    }
+
+                    // ToDo: Check the most effective approach
+                    // vs:
+                    //  - memory consumptions
+                    //  - speed
+
+                    // If a file is greater than 20 MB than use streams
+                    // tslint:disable-next-line:radix
+                    let filesize: number = parseInt(metadata.Length + '');
+                    if (filesize > 20000000) {
+
+                        // console.log('Download using streaming');
+
+                        // Download using streaming
+                        this.downloadAsStream(spFilePath, saveFilePath)
+                            .then(() => {
                                 resolve(saveFilePath);
+                            })
+                            .catch(error => {
+                                console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err.message));
+                                reject(error);
                             });
-                        });
-                    })
-                    .catch((err) => {
-                        console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err.message));
-                        reject(err.message);
-                    });
+
+                    } else {
+
+                        // console.log('Download simple');
+
+                        // Download using sp-request, without streaming, consumes lots of memory in case of large files
+                        this.downloadSimple(spFilePath, saveFilePath)
+                            .then(() => {
+                                resolve(saveFilePath);
+                            })
+                            .catch(error => {
+                                console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err.message));
+                                reject(error);
+                            });
+
+                    }
+
+                });
+
             } else {
                 resolve(saveFilePath);
             }
@@ -232,6 +230,96 @@ export default class RestAPI {
                     reject(err.message);
                 });
         });
+    }
+
+    private downloadAsStream = (spFilePath: string, saveFilePath: string): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            let restUrl: string =
+                `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
+                `?@FileServerRelativeUrl='${encodeURIComponent(spFilePath)}'`;
+
+            getAuth(this.context.siteUrl, this.context.creds)
+                .then(auth => {
+                    let options: OptionsWithUrl = {
+                        url: restUrl,
+                        method: 'GET',
+                        headers: {
+                            ...auth.headers,
+                            'User-Agent': 'sppull'
+                        },
+                        encoding: null,
+                        strictSSL: false,
+                        gzip: true,
+                        agent: this.utils.isUrlHttps(this.context.siteUrl) ? this.agent : undefined,
+                        ...auth.options
+                    };
+                    request(options)
+                        .pipe(fs.createWriteStream(saveFilePath))
+                        .on('error', reject)
+                        .on('finish', () => {
+                            resolve(saveFilePath);
+                        });
+                })
+                .catch(reject);
+        });
+    }
+
+    private downloadSimple = (spFilePath: string, saveFilePath: string): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            let restUrl: string =
+                `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/OpenBinaryStream` +
+                `?@FileServerRelativeUrl='${encodeURIComponent(spFilePath)}'`;
+
+            this.spr.get(restUrl, {
+                encoding: null,
+                agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
+            })
+                .then((response) => {
+                    if (/.json$/.test(saveFilePath)) {
+                        response.body = JSON.stringify(response.body, null, 2);
+                    }
+                    if (/.map$/.test(saveFilePath)) {
+                        response.body = JSON.stringify(response.body);
+                    }
+                    fs.writeFile(saveFilePath, response.body, (err) => {
+                        if (err) {
+                            return reject(err);
+                        }
+                        resolve(saveFilePath);
+                    });
+                })
+                .catch(reject);
+        });
+    }
+
+    private needToDownload = (saveFilePath: string,  metadata?: IFileBasicMetadata): boolean => {
+        let stats: fs.Stats = null;
+        let needDownload: boolean = true;
+
+        if (typeof metadata !== 'undefined') {
+            if (fs.existsSync(saveFilePath)) {
+                stats = fs.statSync(saveFilePath);
+                needDownload = false;
+                if (typeof metadata.Length !== 'undefined') {
+                    // tslint:disable-next-line:radix
+                    if (stats.size !== parseInt(metadata.Length + '')) {
+                        needDownload = true;
+                    }
+                } else {
+                    needDownload = true;
+                }
+                if (typeof metadata.TimeLastModified !== 'undefined') {
+                    let timeLastModified = new Date(metadata.TimeLastModified);
+                    if (stats.mtime < timeLastModified) {
+                        needDownload = true;
+                    }
+                }
+            } else {
+                needDownload = true;
+            }
+        }
+
+        return needDownload;
     }
 
     private getCachedRequest = (): sprequest.ISPRequest => {
