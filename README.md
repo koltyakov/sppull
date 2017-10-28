@@ -6,12 +6,12 @@
 [![Downloads](https://img.shields.io/npm/dm/sppull.svg)](https://www.npmjs.com/package/sppull)
 [![Gitter](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/sharepoint-node/Lobby)
 
-
 Node.js module for downloading files from SharePoint document libraries.
 
 ## New in version 2.2.0
 
 Files streaming download:
+
 - Download files of any supported size
 - Effective memmory consumption while fetching large files
 
@@ -23,22 +23,26 @@ Performance in SPO and HTTPS environments is improved. Download on multiple obje
 
 Smart re-download mechanism. Existing files with no changes are ignored from the download.
 
-## Supported SharePoint versions:
+## Supported SharePoint versions
+
 - SharePoint Online
 - SharePoint 2013
 - SharePoint 2016
 
-## How to use:
+## How to use
 
-### Install:
+### Install
+
 ```bash
 npm install sppull --save-dev
 ```
 
-### Demo:
+### Demo
+
 ![How it works](http://koltyakov.ru/images/sppull-demo.gif)
 
-### Usage:
+### Usage
+
 ```javascript
 var sppull = require("sppull").sppull;
 
@@ -46,12 +50,14 @@ var context = {/*...*/};
 var options = {/*...*/};
 
 sppull(context, options)
-    .then(successHandler)
-    .catch(errorHandler);
+  .then(successHandler)
+  .catch(errorHandler);
 ```
-#### Arguments:
 
-##### Context:
+#### Arguments
+
+##### Context
+
 - `siteUrl` - SharePoint site (SPWeb) url [string, required]
 - `creds`
   - `username` - user name for SP authentication [string, optional in case of some auth methods]
@@ -62,31 +68,32 @@ sppull(context, options)
 
 Since communication module (sp-request), which is used in sppull, had received additional SharePoint authentication methods, they are also supported in sppull.
 
-- SharePoint On-Premise (Add-In permissions):
-    - `clientId`
-    - `issuerId`
-    - `realm`
-    - `rsaPrivateKeyPath`
-    - `shaThumbprint`
+- SharePoint On-Premise (Add-In permissions)
+  - `clientId`
+  - `issuerId`
+  - `realm`
+  - `rsaPrivateKeyPath`
+  - `shaThumbprint`
 - SharePoint On-Premise (NTLM handshake - more commonly used scenario):
-    - `username` - username without domain
-    - `password`
-    - `domain` / `workstation`
+  - `username` - username without domain
+  - `password`
+  - `domain` / `workstation`
 - SharePoint Online (Add-In permissions):
-    - `clientId`
-    - `clientSecret`
+  - `clientId`
+  - `clientSecret`
 - SharePoint Online (SAML based with credentials - more commonly used scenario):
-    - `username` - user name for SP authentication [string, required]
-    - `password` - password [string, required]
+  - `username` - user name for SP authentication [string, required]
+  - `password` - password [string, required]
 - ADFS user credantials:
-    - `username`
-    - `password`
-    - `relyingParty`
-    - `adfsUrl`
+  - `username`
+  - `password`
+  - `relyingParty`
+  - `adfsUrl`
 
 For more information please check node-sp-auth [credential options](https://github.com/s-KaiNet/node-sp-auth#params) and [wiki pages](https://github.com/s-KaiNet/node-sp-auth/wiki).
 
-##### Options:
+##### Options
+
 - `spRootFolder` - root folder in SharePoint to pull from [string, required]
 - `dlRootFolder` - local root folder where files and folders will be saved to [string, optional, default: `./Downloads`]
 - `spBaseFolder` - base folder path which is omitted then saving files locally [string, optional, default: equals to spRootFolder]
@@ -101,7 +108,8 @@ For more information please check node-sp-auth [credential options](https://gith
 - `omitFolderPath` - folder path pattern which is omitted from final downloaded files path [string, optional]
 - `muteConsole` - to mute console messages during transport queries to SharePoint API [boolean, optional, default: `false`]
 
-#### Overloads / cases:
+#### Overloads / cases
+
 - All files with folder structure from spRootFolder
 - Files from spRootFolder folder, first hierarchy level only
 - Folders structure from spRootFolder without files
@@ -112,44 +120,48 @@ For more information please check node-sp-auth [credential options](https://gith
 Use case scenarios can be found on the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Scenarios.md) page. This page suggests combinations of options which are optimal for certain use cases.
 
 #### successHandler
+
 Callback gets called upon successful files download.
 
 #### errorHandler
+
 Callback gets executed in case of exception inside `sppull`. Accepts error object as first argument for callback.
 
 ## Samples
+
 Refer to the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Scenarios.md) page for suggested options combinations available with `sppull`.
 
-#### Basic usage:
+### Basic usage
+
 ```javascript
 var sppull = require("sppull").sppull;
 
 var context = {
-    siteUrl: "http://contoso.sharepoint.com/subsite",
-    creds: {
-        username: "user@contoso.com",
-        password: "_Password_"
-    }
+  siteUrl: "http://contoso.sharepoint.com/subsite",
+  creds: {
+    username: "user@contoso.com",
+    password: "_Password_"
+  }
 };
 
 var options = {
-    spRootFolder: "Shared%20Documents/Contracts",
-    dlRootFolder: "./Downloads/Contracts"
+  spRootFolder: "Shared%20Documents/Contracts",
+  dlRootFolder: "./Downloads/Contracts"
 };
 
-/* 
- * All files will be downloaded from http://contoso.sharepoint.com/subsite/Shared%20Documents/Contracts folder 
+/*
+ * All files will be downloaded from http://contoso.sharepoint.com/subsite/Shared%20Documents/Contracts folder
  * to __dirname + /Downloads/Contracts folder.
  * Folders structure will remain original as it is in SharePoint's target folder.
 */
 sppull(context, options)
-    .then(function(downloadResults) {
-        console.log("Files are downloaded");
-        console.log("For more, please check the results", JSON.stringify(downloadResults));
-    })
-    .catch(function(err) {
-        console.log("Core error has happened", err);
-    });
+  .then(function(downloadResults) {
+    console.log("Files are downloaded");
+    console.log("For more, please check the results", JSON.stringify(downloadResults));
+  })
+  .catch(function(err) {
+    console.log("Core error has happened", err);
+  });
 ```
 
 ### Passwords storage

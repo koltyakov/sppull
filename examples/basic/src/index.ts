@@ -6,16 +6,16 @@ const sppull = Download.sppull;
 
 (new SPAuthConfigurator()).getContext().then((context) => {
 
-    let pullContext: ISPPullContext = <any>{
-        siteUrl: context.siteUrl,
-        ...context.authOptions
-    };
+  let pullContext: ISPPullContext = {
+    siteUrl: context.siteUrl,
+    ...context.authOptions
+  } as any;
 
-    let pullOptions: ISPPullOptions = {
-        spRootFolder: 'Shared%20Documents',
-        dlRootFolder: './Downloads/Documents'
-    };
+  let pullOptions: ISPPullOptions = {
+    spRootFolder: 'Shared%20Documents',
+    dlRootFolder: './Downloads/Documents'
+  };
 
-    sppull(pullContext, pullOptions);
+  sppull(pullContext, pullOptions);
 
 }).catch(console.log);

@@ -1,12 +1,12 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "module": "commonjs",
-        "lib": [ "es6" ],
-        "sourceMap": true,
-        "declaration": true,
-        "moduleResolution": "node",
-        "noImplicitAny": false,
-        "removeComments": true
-    }
+  "compilerOptions": {
+    "target": "es5",
+    "module": "commonjs",
+    "lib": ["es6"],
+    "sourceMap": true,
+    "declaration": true,
+    "moduleResolution": "node",
+    "noImplicitAny": false,
+    "removeComments": true
+  }
 }
