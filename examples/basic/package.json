@@ -10,13 +10,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-sp-auth-config": "^2.0.1",
-    "sppull": "^2.0.5"
+    "node-sp-auth-config": "^2.0.11",
+    "sppull": "^2.2.1"
   },
   "devDependencies": {
-    "@types/node": "^6.0.73",
-    "ts-node": "^3.0.4",
-    "tslint": "^5.2.0",
-    "typescript": "^2.3.2"
+    "@types/node": "^8.0.47",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.5.3",
+    "tslint-config-standard": "^7.0.0"
   }
 }
