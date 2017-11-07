@@ -239,12 +239,15 @@ export default class RestAPI {
         `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
         `?@FileServerRelativeUrl='${encodeURIComponent(spFilePath)}'`;
 
+      let envProcessHeaders = process.env['_sp_request_headers'] || {};
+
       getAuth(this.context.siteUrl, this.context.creds)
         .then(auth => {
           let options: OptionsWithUrl = {
             url: restUrl,
             method: 'GET',
             headers: {
+              ...envProcessHeaders,
               ...auth.headers,
               'User-Agent': 'sppull'
             },
