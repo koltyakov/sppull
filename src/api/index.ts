@@ -239,7 +239,10 @@ export default class RestAPI {
         `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
         `?@FileServerRelativeUrl='${encodeURIComponent(spFilePath)}'`;
 
-      let envProcessHeaders = process.env['_sp_request_headers'] || {};
+      let envProcessHeaders = {};
+      try {
+        envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
+      } catch (ex) {}
 
       getAuth(this.context.siteUrl, this.context.creds)
         .then(auth => {
