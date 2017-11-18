@@ -115,13 +115,15 @@ export default class RestAPI {
         spRootFolder = spRootFolder.substring(0, spRootFolder.length - 1);
       }
 
-      restUrl = this.context.siteUrl + '/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)' +
-        '?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields' +
-        '&$select=##MetadataSrt#' +
-        'Folders/ListItemAllFields/Id,' +
-        'Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,' +
-        'Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeLastModified,Files/ModifiedBy' +
-        '&@FolderServerRelativeUrl=\'' + encodeURIComponent(spRootFolder) + '\'';
+      restUrl = this.utils.trimMultiline(`
+        ${this.context.siteUrl}/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)
+          ?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields
+          &$select=##MetadataSrt#
+            Folders/ListItemAllFields/Id,
+            Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,
+            Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeLastModified,Files/ModifiedBy
+          &@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spRootFolder)}'
+      `);
 
       let metadataStr: string = this.options.metaFields.map((fieldName) => {
         return 'Files/ListItemAllFields/' + fieldName;
@@ -170,11 +172,12 @@ export default class RestAPI {
       this.spr.requestDigest(this.context.siteUrl)
         .then((digest) => {
           let restUrl;
-          restUrl = this.context.siteUrl + '/_api/Web/GetList(@DocLibUrl)/GetItems' +
-            '?$select=' +
-            '##MetadataSrt#' +
-            'Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeLastModified,Length,ModifiedBy' +
-            '&@DocLibUrl=\'' + encodeURIComponent(this.options.spDocLibUrl) + '\'';
+          restUrl = this.utils.trimMultiline(`
+            ${this.context.siteUrl}/_api/Web/GetList(@DocLibUrl)/GetItems
+              ?$select=##MetadataSrt#
+                Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeLastModified,Length,ModifiedBy
+              &@DocLibUrl='${this.utils.escapeURIComponent(this.options.spDocLibUrl)}'
+          `);
 
           let metadataStr: string = this.options.metaFields.map((fieldName) => {
             return `Files/ListItemAllFields/${fieldName}`;
@@ -237,11 +240,12 @@ export default class RestAPI {
     return new Promise((resolve, reject) => {
       let restUrl: string =
         `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
-        `?@FileServerRelativeUrl='${encodeURIComponent(spFilePath)}'`;
+        `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
 
       let envProcessHeaders = {};
       try {
         envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
+      // tslint:disable-next-line:no-empty
       } catch (ex) {}
 
       getAuth(this.context.siteUrl, this.context.creds)
@@ -275,7 +279,7 @@ export default class RestAPI {
     return new Promise((resolve, reject) => {
       let restUrl: string =
         `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/OpenBinaryStream` +
-        `?@FileServerRelativeUrl='${encodeURIComponent(spFilePath)}'`;
+        `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
 
       this.spr.get(restUrl, {
         encoding: null,

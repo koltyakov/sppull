@@ -16,11 +16,10 @@ export const TestsConfigs: ITestSetup[] = [
     configPath: './config/integration/private.2016.json',
     spRootFolder: 'Shared Documents',
     dlRootFolder: './downloads/2016'
+  }, {
+    environmentName: 'On-Premise 2013',
+    configPath: './config/integration/private.2013.json',
+    spRootFolder: 'Shared Documents',
+    dlRootFolder: './downloads/2013'
   }
-  // , {
-  //     environmentName: 'On-Premise 2013',
-  //     configPath: './config/integration/private.2013.json',
-  //     spRootFolder: 'Shared Documents',
-  //     dlRootFolder: './downloads/2013'
-  // }
 ];
