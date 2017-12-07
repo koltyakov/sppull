@@ -40,9 +40,11 @@ export default class RestAPI {
     return new Promise((resolve, reject) => {
       this.spr = this.getCachedRequest();
 
+      let spBaseFolderRegEx = new RegExp(decodeURIComponent(this.options.spBaseFolder), 'gi');
+
       let saveFilePath = path.join(
         this.options.dlRootFolder,
-        decodeURIComponent(spFilePath).replace(decodeURIComponent(this.options.spBaseFolder), '')
+        decodeURIComponent(spFilePath).replace(spBaseFolderRegEx, '')
       );
 
       if (typeof this.options.omitFolderPath !== 'undefined') {
