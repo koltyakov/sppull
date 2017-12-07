@@ -9,7 +9,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "build": "npm install && gulp tsc",
+    "build": "gulp tsc",
     "test": "ts-node ./test/init && mocha --opts test/mocha.opts || ECHO.",
     "upgrade": "ncu --upgrade --upgradeAll && yarn upgrade"
   },
@@ -31,7 +31,7 @@
   "dependencies": {
     "colors": "^1.1.2",
     "mkdirp": "^0.5.1",
-    "node-sp-auth-config": "^2.1.1",
+    "node-sp-auth-config": "^2.3.1",
     "request": "^2.83.0",
     "sp-request": "^2.1.2"
   },
@@ -54,7 +54,7 @@
     "ts-node": "^3.3.0",
     "tslint": "^5.8.0",
     "tslint-config-standard": "^7.0.0",
-    "typescript": "^2.6.1",
+    "typescript": "^2.6.2",
     "yargs": "^10.0.3"
   }
 }
