@@ -1,3 +1,5 @@
+//@ts-check
+
 'use strict';
 
 const gulp = require('gulp');
@@ -5,6 +7,7 @@ const merge = require('merge-stream');
 const tslint = require('gulp-tslint');
 const tsc = require('gulp-typescript');
 
+// @ts-ignore
 const tsconfig = require('./tsconfig.json');
 
 gulp.task('clean', () => {
@@ -17,10 +20,10 @@ gulp.task('prepublish', ['clean'], () => {
     .src(['./src/**/*.ts'])
     .pipe(tsc.createProject('tsconfig.json')());
 
-  return merge[
+  return merge(
     tsSourcesResult.js.pipe(gulp.dest('./dist')),
     tsSourcesResult.dts.pipe(gulp.dest('./dist'))
-  ];
+  );
 });
 
 gulp.task('tsc', () => {
@@ -44,10 +47,12 @@ gulp.task('tslint', () => {
   const yargs = require('yargs');
   let emitError = yargs.argv.emitError;
   return gulp.src(['src/**/*.ts'])
+    // @ts-ignore
     .pipe(tslint({
       configuration: './tslint.json',
       formatter: 'verbose'
     }))
+    // @ts-ignore
     .pipe(tslint.report({
       summarizeFailureOutput: true,
       emitError: emitError

@@ -49,6 +49,21 @@
   dependencies:
     "@types/node" "*"
 
+"@types/gulp-tslint@^3.6.32":
+  version "3.6.32"
+  resolved "https://registry.yarnpkg.com/@types/gulp-tslint/-/gulp-tslint-3.6.32.tgz#cc2ff648e204ead027a031649f6fd4a5ac09f190"
+  dependencies:
+    "@types/node" "*"
+    "@types/vinyl" "*"
+
+"@types/gulp@^3.8.35":
+  version "3.8.35"
+  resolved "https://registry.yarnpkg.com/@types/gulp/-/gulp-3.8.35.tgz#352a308070ca5c5bd52cf6b676d2273f2a4f9b65"
+  dependencies:
+    "@types/node" "*"
+    "@types/orchestrator" "*"
+    "@types/vinyl" "*"
+
 "@types/jsonwebtoken@^7.1.33", "@types/jsonwebtoken@^7.2.3":
   version "7.2.3"
   resolved "https://registry.yarnpkg.com/@types/jsonwebtoken/-/jsonwebtoken-7.2.3.tgz#483c8f39945e1e6d308dcc51fd4aeca5208d4dca"
@@ -75,6 +90,17 @@
   version "8.0.53"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-8.0.53.tgz#396b35af826fa66aad472c8cb7b8d5e277f4e6d8"
 
+"@types/orchestrator@*":
+  version "0.3.2"
+  resolved "https://registry.yarnpkg.com/@types/orchestrator/-/orchestrator-0.3.2.tgz#cd15c6cea978a32b98e5054239cbcc78e55671f1"
+  dependencies:
+    "@types/node" "*"
+    "@types/q" "*"
+
+"@types/q@*":
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/@types/q/-/q-1.0.6.tgz#ab615b4c8338dae2ce6777be013af029e357ecdb"
+
 "@types/request-promise@^3.0.32":
   version "3.0.32"
   resolved "https://registry.yarnpkg.com/@types/request-promise/-/request-promise-3.0.32.tgz#54e02575b8a6cbc8fbe8d4a024398b68176d3f43"
@@ -98,6 +124,12 @@
   resolved "https://registry.yarnpkg.com/@types/request/-/request-2.0.8.tgz#424d3de255868107ed4dd6695c65c5f1766aba80"
   dependencies:
     "@types/form-data" "*"
+    "@types/node" "*"
+
+"@types/vinyl@*":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@types/vinyl/-/vinyl-2.0.1.tgz#6b414dfdcd4a785e8e76e87565ed29e79490d9b7"
+  dependencies:
     "@types/node" "*"
 
 acorn@4.X:
