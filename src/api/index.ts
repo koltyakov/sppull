@@ -41,11 +41,12 @@ export default class RestAPI {
       this.spr = this.getCachedRequest();
 
       let spBaseFolderRegEx = new RegExp(decodeURIComponent(this.options.spBaseFolder), 'gi');
+      let spFilePathRelative = decodeURIComponent(spFilePath);
+      if (['', '/'].indexOf(this.options.spBaseFolder) === -1) {
+        spFilePathRelative = decodeURIComponent(spFilePath).replace(spBaseFolderRegEx, '');
+      }
 
-      let saveFilePath = path.join(
-        this.options.dlRootFolder,
-        decodeURIComponent(spFilePath).replace(spBaseFolderRegEx, '')
-      );
+      let saveFilePath = path.join(this.options.dlRootFolder, spFilePathRelative);
 
       if (typeof this.options.omitFolderPath !== 'undefined') {
         let omitFolderPath = path.resolve(this.options.omitFolderPath);

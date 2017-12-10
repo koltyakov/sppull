@@ -126,8 +126,15 @@ export class Download {
 
   private createFolder = (spFolderPath: string, spBaseFolder: string, downloadRoot: string): Promise<any> => {
     return new Promise((resolve, reject) => {
+
       let spBaseFolderRegEx = new RegExp(decodeURIComponent(this.options.spBaseFolder), 'gi');
-      let saveFolderPath: string = downloadRoot + '/' + decodeURIComponent(spFolderPath).replace(spBaseFolderRegEx, '');
+      let spFolderPathRelative = decodeURIComponent(spFolderPath);
+      if (['', '/'].indexOf(this.options.spBaseFolder) === -1) {
+        spFolderPathRelative = decodeURIComponent(spFolderPath).replace(spBaseFolderRegEx, '');
+      }
+
+      let saveFolderPath: string = path.join(downloadRoot, spFolderPathRelative);
+
       mkdirp(saveFolderPath, (err) => {
         if (err) {
           console.log(colors.red.bold('Error creating folder ' + '`' + saveFolderPath + ' `'), colors.red(err));

@@ -18,7 +18,8 @@ const authSettings: IAuthConfigSettings = {
   } as any;
 
   let pullOptions: ISPPullOptions = {
-    spRootFolder: 'Shared%20Documents', // 'shared documents', // Should act the same
+    spBaseFolder: '/',
+    spRootFolder: 'Shared%20Documents', // 'Shared%20Documents', // 'shared documents', // Should act the same
     dlRootFolder: join(__dirname, 'Downloads')
   };
 
