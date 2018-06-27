@@ -1,8 +1,4 @@
-node_modules
-config/**/private.json
-config/**/private.*.json
-debug.log
-npm-debug.*
-downloads
-download
-dist
+node_modules/
+config/**/private.*
+downloads/
+dist/

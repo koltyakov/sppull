@@ -2,11 +2,24 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "lib": ["es6"],
+    "lib": ["es2017", "dom"],
     "sourceMap": true,
     "declaration": true,
     "moduleResolution": "node",
     "noImplicitAny": false,
-    "removeComments": true
-  }
+    "removeComments": true,
+    "newLine": "LF",
+    "skipLibCheck": true,
+    "types": ["node", "mocha"],
+    "outDir": "dist"
+  },
+  "include": [
+    "src/**/*.ts",
+    "test/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test"
+  ]
 }
