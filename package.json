@@ -41,6 +41,7 @@
     "chai": "^4.2.0",
     "cpass": "^2.0.5",
     "mocha": "^5.2.0",
+    "spsave": "^3.1.5",
     "ts-node": "^7.0.1",
     "tslint": "^5.11.0",
     "tslint-config-standard": "^8.0.1",
