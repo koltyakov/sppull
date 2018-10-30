@@ -5,8 +5,6 @@ import * as mkdirp from 'mkdirp';
 import * as colors from 'colors';
 import * as sprequest from 'sp-request';
 import * as request from 'request';
-// tslint:disable-next-line:no-duplicate-imports
-import { OptionsWithUrl } from 'request';
 import { getAuth } from 'node-sp-auth';
 
 import { Utils } from './../utils';
@@ -39,7 +37,7 @@ export default class RestAPI {
     return new Promise((resolve, reject) => {
       this.spr = this.getCachedRequest();
 
-      let spBaseFolderRegEx = new RegExp(decodeURIComponent(this.options.spBaseFolder), 'gi');
+      const spBaseFolderRegEx = new RegExp(decodeURIComponent(this.options.spBaseFolder), 'gi');
       let spFilePathRelative = decodeURIComponent(spFilePath);
       if (['', '/'].indexOf(this.options.spBaseFolder) === -1) {
         spFilePathRelative = decodeURIComponent(spFilePath).replace(spBaseFolderRegEx, '');
@@ -48,13 +46,13 @@ export default class RestAPI {
       let saveFilePath = path.join(this.options.dlRootFolder, spFilePathRelative);
 
       if (typeof this.options.omitFolderPath !== 'undefined') {
-        let omitFolderPath = path.resolve(this.options.omitFolderPath);
+        // const omitFolderPath = path.resolve(this.options.omitFolderPath);
         saveFilePath = path.join(saveFilePath.replace(this.options.omitFolderPath, ''));
       }
 
       if (this.needToDownload(saveFilePath, metadata)) {
 
-        let saveFolderPath = path.dirname(saveFilePath);
+        const saveFolderPath = path.dirname(saveFilePath);
 
         mkdirp(saveFolderPath, err => {
           if (err) {
@@ -69,7 +67,7 @@ export default class RestAPI {
 
           // If a file is greater than 20 MB than use streams
           // tslint:disable-next-line:radix
-          let filesize: number = parseInt(metadata.Length + '');
+          const filesize: number = parseInt(metadata.Length + '');
           if (filesize > 20000000) {
 
             // console.log('Download using streaming');
@@ -90,9 +88,7 @@ export default class RestAPI {
 
             // Download using sp-request, without streaming, consumes lots of memory in case of large files
             this.downloadSimple(spFilePath, saveFilePath)
-              .then(() => {
-                resolve(saveFilePath);
-              })
+              .then(() => resolve(saveFilePath))
               .catch(error => {
                 console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err.message));
                 reject(error);
@@ -127,7 +123,7 @@ export default class RestAPI {
           &@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spRootFolder)}'
       `);
 
-      let metadataStr: string = this.options.metaFields.map((fieldName) => {
+      let metadataStr: string = this.options.metaFields.map(fieldName => {
         return 'Files/ListItemAllFields/' + fieldName;
       }).join(',');
 
@@ -140,12 +136,12 @@ export default class RestAPI {
       this.spr.get(restUrl, {
         agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
       })
-        .then((response: any) => {
-          let results = {
-            folders: (response.body.d.Folders.results || []).filter((folder) => {
+        .then(response => {
+          const results = {
+            folders: (response.body.d.Folders.results || []).filter(folder => {
               return typeof folder.ListItemAllFields.Id !== 'undefined';
             }),
-            files: (response.body.d.Files.results || []).map((file) => {
+            files: (response.body.d.Files.results || []).map(file => {
               return {
                 ...file,
                 metadata: this.options.metaFields.reduce((meta, field) => {
@@ -161,7 +157,7 @@ export default class RestAPI {
           };
           resolve(results);
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(colors.red.bold('\nError in getFolderContent:'), colors.red(err.message));
           reject(err.message);
         });
@@ -172,16 +168,15 @@ export default class RestAPI {
     return new Promise((resolve, reject) => {
       this.spr = this.getCachedRequest();
       this.spr.requestDigest(this.context.siteUrl)
-        .then((digest) => {
-          let restUrl;
-          restUrl = this.utils.trimMultiline(`
+        .then(digest => {
+          let restUrl = this.utils.trimMultiline(`
             ${this.context.siteUrl}/_api/Web/GetList(@DocLibUrl)/GetItems
               ?$select=##MetadataSrt#
                 Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeLastModified,Length,ModifiedBy
               &@DocLibUrl='${this.utils.escapeURIComponent(this.options.spDocLibUrl)}'
           `);
 
-          let metadataStr: string = this.options.metaFields.map((fieldName) => {
+          let metadataStr: string = this.options.metaFields.map(fieldName => {
             return `Files/ListItemAllFields/${fieldName}`;
           }).join(',');
 
@@ -208,10 +203,10 @@ export default class RestAPI {
             agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
           });
         })
-        .then((response) => {
-          let filesData = [];
-          let foldersData = [];
-          response.body.d.results.forEach((item) => {
+        .then(response => {
+          const filesData = [];
+          const foldersData = [];
+          response.body.d.results.forEach(item => {
             item.metadata = this.options.metaFields.reduce((meta, field) => {
               if (item.hasOwnProperty(field)) {
                 meta[field] = item[field];
@@ -225,13 +220,13 @@ export default class RestAPI {
               foldersData.push(item);
             }
           });
-          let results = {
+          const results = {
             files: filesData,
             folders: foldersData
           };
           resolve(results);
         })
-        .catch((err) => {
+        .catch(err => {
           console.log(colors.red.bold('\nError in getContentWithCaml:'), colors.red(err.message));
           reject(err.message);
         });
@@ -240,19 +235,18 @@ export default class RestAPI {
 
   private downloadAsStream = (spFilePath: string, saveFilePath: string): Promise<string> => {
     return new Promise((resolve, reject) => {
-      let restUrl: string =
+      const restUrl: string =
         `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
         `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
 
       let envProcessHeaders = {};
       try {
         envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
-      // tslint:disable-next-line:no-empty
-      } catch (ex) {}
+      } catch (ex) { /**/ }
 
       getAuth(this.context.siteUrl, this.context.creds)
         .then(auth => {
-          let options: OptionsWithUrl = {
+          const options: request.OptionsWithUrl = {
             url: restUrl,
             method: 'GET',
             headers: {
@@ -269,9 +263,7 @@ export default class RestAPI {
           request(options)
             .pipe(fs.createWriteStream(saveFilePath))
             .on('error', reject)
-            .on('finish', () => {
-              resolve(saveFilePath);
-            });
+            .on('finish', () => resolve(saveFilePath));
         })
         .catch(reject);
     });
@@ -279,29 +271,38 @@ export default class RestAPI {
 
   private downloadSimple = (spFilePath: string, saveFilePath: string): Promise<string> => {
     return new Promise((resolve, reject) => {
-      let restUrl: string =
+      const restUrl: string =
         `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/OpenBinaryStream` +
         `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
 
-      this.spr.get(restUrl, {
-        encoding: null,
-        agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
-      })
-        .then((response) => {
-          if (/.json$/.test(saveFilePath)) {
-            response.body = JSON.stringify(response.body, null, 2);
-          }
-          if (/.map$/.test(saveFilePath)) {
-            response.body = JSON.stringify(response.body);
-          }
-          fs.writeFile(saveFilePath, response.body, (err) => {
-            if (err) {
-              return reject(err);
-            }
-            resolve(saveFilePath);
-          });
+      let envProcessHeaders = {};
+      try {
+        envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
+      } catch (ex) { /**/ }
+
+      getAuth(this.context.siteUrl, this.context.creds)
+        .then(auth => {
+          const options: request.OptionsWithUrl = {
+            url: restUrl,
+            method: 'GET',
+            headers: {
+              ...envProcessHeaders,
+              ...auth.headers,
+              'User-Agent': 'sppull'
+            },
+            encoding: null,
+            strictSSL: false,
+            gzip: true,
+            agent: this.utils.isUrlHttps(this.context.siteUrl) ? this.agent : undefined,
+            ...auth.options
+          };
+          request(options)
+            .pipe(fs.createWriteStream(saveFilePath))
+            .on('error', reject)
+            .on('finish', () => resolve(saveFilePath));
         })
         .catch(reject);
+
     });
   }
 
@@ -314,15 +315,14 @@ export default class RestAPI {
         stats = fs.statSync(saveFilePath);
         needDownload = false;
         if (typeof metadata.Length !== 'undefined') {
-          // tslint:disable-next-line:radix
-          if (stats.size !== parseInt(metadata.Length + '')) {
+          if (stats.size !== parseInt(metadata.Length + '', 10)) {
             needDownload = true;
           }
         } else {
           needDownload = true;
         }
         if (typeof metadata.TimeLastModified !== 'undefined') {
-          let timeLastModified = new Date(metadata.TimeLastModified);
+          const timeLastModified = new Date(metadata.TimeLastModified);
           if (stats.mtime < timeLastModified) {
             needDownload = true;
           }
