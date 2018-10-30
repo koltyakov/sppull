@@ -3,12 +3,11 @@ import * as path from 'path';
 import * as https from 'https';
 import * as mkdirp from 'mkdirp';
 import * as colors from 'colors';
-import * as readline from 'readline';
 import * as sprequest from 'sp-request';
 import * as request from 'request';
 // tslint:disable-next-line:no-duplicate-imports
 import { OptionsWithUrl } from 'request';
-import { getAuth, IAuthOptions } from 'node-sp-auth';
+import { getAuth } from 'node-sp-auth';
 
 import { Utils } from './../utils';
 import { ISPPullOptions, ISPPullContext, IFileBasicMetadata } from '../interfaces';

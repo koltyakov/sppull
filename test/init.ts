@@ -6,14 +6,10 @@ import { TestsConfigs } from './configs';
 
 async function checkOrPromptForIntegrationConfigCreds (): Promise<void> {
 
-  let configs = [];
-
-  for (let testConfig of TestsConfigs) {
-    console.log(`\n=== ${colors.bold.yellow(`${testConfig.environmentName} Credentials`)} ===\n`);
-    await (new SPAuthConfigirator({
-      configPath: testConfig.configPath
-    })).getContext();
-    console.log(colors.grey(`Gotcha ${path.resolve(testConfig.configPath)}`));
+  for (const { configPath, environmentName } of TestsConfigs) {
+    console.log(`\n=== ${colors.bold.yellow(`${environmentName} Credentials`)} ===\n`);
+    await new SPAuthConfigirator({ configPath }).getContext();
+    console.log(colors.grey(`Gotcha ${path.resolve(configPath)}`));
   }
 
   console.log('\n');
