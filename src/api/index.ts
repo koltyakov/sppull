@@ -104,15 +104,17 @@ export default class RestAPI {
     });
   }
 
-  public getFolderContent = (spRootFolder: string): Promise<any> => {
-    return new Promise((resolve, reject) => {
-      let restUrl: string;
-      this.spr = this.getCachedRequest();
+  public getFolderContent = async (spRootFolder: string): Promise<any> => {
+    let restUrl: string;
+    this.spr = this.getCachedRequest();
 
-      if (spRootFolder.charAt(spRootFolder.length - 1) === '/') {
-        spRootFolder = spRootFolder.substring(0, spRootFolder.length - 1);
-      }
+    if (spRootFolder.charAt(spRootFolder.length - 1) === '/') {
+      spRootFolder = spRootFolder.substring(0, spRootFolder.length - 1);
+    }
 
+    const folderInDocLibrary = await this.checkIfFolderInDocLibrary(spRootFolder);
+
+    if (folderInDocLibrary) {
       restUrl = this.utils.trimMultiline(`
         ${this.context.siteUrl}/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)
           ?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields
@@ -122,16 +124,25 @@ export default class RestAPI {
             Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeLastModified,Files/ModifiedBy
           &@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spRootFolder)}'
       `);
-
       let metadataStr: string = this.options.metaFields.map(fieldName => {
         return 'Files/ListItemAllFields/' + fieldName;
       }).join(',');
-
       if (metadataStr.length > 0) {
         metadataStr += ',';
       }
-
       restUrl = restUrl.replace(/##MetadataSrt#/g, metadataStr);
+    } else {
+      restUrl = this.utils.trimMultiline(`
+        ${this.context.siteUrl}/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)
+          ?$expand=Folders,Files
+          &$select=
+            Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,
+            Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeLastModified,Files/ModifiedBy
+          &@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spRootFolder)}'
+      `);
+    }
+
+    return new Promise((resolve, reject) => {
 
       this.spr.get(restUrl, {
         agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
@@ -139,20 +150,31 @@ export default class RestAPI {
         .then(response => {
           const results = {
             folders: (response.body.d.Folders.results || []).filter(folder => {
-              return typeof folder.ListItemAllFields.Id !== 'undefined';
+              if (folderInDocLibrary) {
+                return typeof folder.ListItemAllFields.Id !== 'undefined';
+              } else {
+                return true;
+              }
             }),
             files: (response.body.d.Files.results || []).map(file => {
-              return {
-                ...file,
-                metadata: this.options.metaFields.reduce((meta, field) => {
-                  if (typeof file.ListItemAllFields !== 'undefined') {
-                    if (file.ListItemAllFields.hasOwnProperty(field)) {
-                      meta[field] = file.ListItemAllFields[field];
+              if (folderInDocLibrary) {
+                return {
+                  ...file,
+                  metadata: this.options.metaFields.reduce((meta, field) => {
+                    if (typeof file.ListItemAllFields !== 'undefined') {
+                      if (file.ListItemAllFields.hasOwnProperty(field)) {
+                        meta[field] = file.ListItemAllFields[field];
+                      }
                     }
-                  }
-                  return meta;
-                }, {})
-              };
+                    return meta;
+                  }, {})
+                };
+              } else {
+                return {
+                  ...file,
+                  metafata: {}
+                };
+              }
             })
           };
           resolve(results);
@@ -230,6 +252,27 @@ export default class RestAPI {
           console.log(colors.red.bold('\nError in getContentWithCaml:'), colors.red(err.message));
           reject(err.message);
         });
+    });
+  }
+
+  private checkIfFolderInDocLibrary = (spFolder: string): Promise<boolean> => {
+    return new Promise(resolve => {
+      this.spr = this.getCachedRequest();
+
+      if (spFolder.charAt(spFolder.length - 1) === '/') {
+        spFolder = spFolder.substring(0, spFolder.length - 1);
+      }
+
+      const restUrl = this.utils.trimMultiline(`
+        ${this.context.siteUrl}/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)/listItemAllFields
+          ?@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spFolder)}'
+      `);
+
+      this.spr.get(restUrl, {
+        agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
+      })
+        .then(_ => resolve(true))
+        .catch(_ => resolve(false));
     });
   }
 
