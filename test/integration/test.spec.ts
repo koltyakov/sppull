@@ -15,23 +15,17 @@ for (const testConfig of TestsConfigs) {
   describe(`Run tests in ${testConfig.environmentName}`, () => {
 
     let context: ISPPullContext;
-    let config: any;
 
-    before('Configure', function (done: any): void {
+    before('Configure', function(done: any): void {
       this.timeout(30 * 1000);
-      config = require(path.resolve(testConfig.configPath));
-      context = {
-        siteUrl: config.siteUrl,
-        creds: {
-          ...config,
-          password: config.password && cpass.decode(config.password)
-        }
-      };
+      const { siteUrl, ...creds } = require(path.resolve(testConfig.configPath));
+      creds.password = creds.password && cpass.decode(creds.password);
+      context = { siteUrl, creds };
       deleteFolderRecursive(testConfig.dlRootFolder);
       done();
     });
 
-    it(`should pull in basic mode`, function (done: MochaDone): void {
+    it(`should pull in basic mode`, function(done: MochaDone): void {
       this.timeout(300 * 1000);
 
       const options: ISPPullOptions = {
@@ -43,7 +37,7 @@ for (const testConfig of TestsConfigs) {
       sppull(context, options).then(_ => done()).catch(done);
     });
 
-    it(`should pull in strict mode`, function (done: MochaDone): void {
+    it(`should pull in strict mode`, function(done: MochaDone): void {
       this.timeout(300 * 1000);
 
       const options: ISPPullOptions = {
@@ -60,7 +54,7 @@ for (const testConfig of TestsConfigs) {
       sppull(context, options).then(_ => done()).catch(done);
     });
 
-    it(`should pull without subfolders data`, function (done: MochaDone): void {
+    it(`should pull without subfolders data`, function(done: MochaDone): void {
       this.timeout(100 * 1000);
 
       const options: ISPPullOptions = {
@@ -74,7 +68,7 @@ for (const testConfig of TestsConfigs) {
       sppull(context, options).then(_ => done()).catch(done);
     });
 
-    it(`should pull folders structure`, function (done: MochaDone): void {
+    it(`should pull folders structure`, function(done: MochaDone): void {
       this.timeout(300 * 1000);
 
       const options: ISPPullOptions = {
@@ -87,7 +81,7 @@ for (const testConfig of TestsConfigs) {
       sppull(context, options).then(_ => done()).catch(done);
     });
 
-    it(`should pull using caml condition`, function (done: MochaDone): void {
+    it(`should pull using caml condition`, function(done: MochaDone): void {
       this.timeout(100 * 1000);
 
       const d = new Date();
@@ -109,7 +103,7 @@ for (const testConfig of TestsConfigs) {
       sppull(context, options).then(_ => done()).catch(done);
     });
 
-    it(`should pull with additional metadata`, function (done: MochaDone): void {
+    it(`should pull with additional metadata`, function(done: MochaDone): void {
       this.timeout(300 * 1000);
 
       const options: ISPPullOptions = {
@@ -131,7 +125,7 @@ for (const testConfig of TestsConfigs) {
         .catch(done);
     });
 
-    after('Deleting test objects', function (done: MochaDone): void {
+    after('Deleting test objects', function(done: MochaDone): void {
       this.timeout(150 * 1000);
       deleteFolderRecursive(testConfig.dlRootFolder);
       done();
