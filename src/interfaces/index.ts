@@ -21,6 +21,7 @@ export interface ISPPullOptions {
   spRelativeBase?: string;
   spRootFolder?: string;
   spBaseFolder?: string;
+  fileRegExp?: RegExp;
   dlRootFolder?: string;
   recursive?: boolean;
   foderStructureOnly?: boolean;
