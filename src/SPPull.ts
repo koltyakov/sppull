@@ -275,6 +275,11 @@ export class Download {
   private runCreateFoldersRecursively = (): Promise<any> => {
     return this.getStructureRecursive().then(data => {
       if ((data.folders || []).length > 0) {
+        // let folders: { ServerRelativeUrl: string }[] = data.folders || [];
+        // const { fileRegExp } = this.options;
+        // if (typeof fileRegExp === 'object' && typeof fileRegExp.test === 'function') {
+        //   folders = folders.filter(f => fileRegExp.test(f.ServerRelativeUrl));
+        // }
         return this.createFoldersQueue(data.folders, 0);
       } else {
         return [];
@@ -283,29 +288,28 @@ export class Download {
   }
 
   private downloadMyFilesHandler = (data): Promise<any> => {
-    if ((data.files || []).length > 0) {
-      return Promise.resolve(this.downloadFilesQueue(data.files, 0));
+    let files: { ServerRelativeUrl: string }[] = data.files || [];
+    const { fileRegExp } = this.options;
+    if (typeof fileRegExp === 'object' && typeof fileRegExp.test === 'function') {
+      files = files.filter(f => fileRegExp.test(f.ServerRelativeUrl));
+    }
+    if (files.length > 0) {
+      return Promise.resolve(this.downloadFilesQueue(files, 0));
     } else {
       return Promise.resolve([]);
     }
   }
 
   private runDownloadFilesRecursively (): Promise<any> {
-    return this.getStructureRecursive()
-      .then(data => {
-        if (this.options.createEmptyFolders) {
-          if ((data.folders || []).length > 0) {
-            return this.createFoldersQueue(data.folders, 0)
-              .then(() => {
-                return this.downloadMyFilesHandler(data);
-              });
-          } else {
-            return this.downloadMyFilesHandler(data);
-          }
-        } else {
-          return this.downloadMyFilesHandler(data);
+    return this.getStructureRecursive().then(async data => {
+      if (this.options.createEmptyFolders) {
+        const folders = data.folders || [];
+        if (folders.length > 0) {
+          await this.createFoldersQueue(folders, 0);
         }
-      });
+      }
+      return this.downloadMyFilesHandler(data);
+    });
   }
 
   private runDownloadFilesFlat = (): Promise<any> => {
