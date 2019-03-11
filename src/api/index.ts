@@ -78,7 +78,7 @@ export default class RestAPI {
                 resolve(saveFilePath);
               })
               .catch(error => {
-                console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err.message));
+                console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
                 reject(error);
               });
 
@@ -90,7 +90,7 @@ export default class RestAPI {
             this.downloadSimple(spFilePath, saveFilePath)
               .then(() => resolve(saveFilePath))
               .catch(error => {
-                console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err.message));
+                console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
                 reject(error);
               });
 
