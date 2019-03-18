@@ -37,7 +37,7 @@ export default class RestAPI {
     return new Promise((resolve, reject) => {
       this.spr = this.getCachedRequest();
 
-      const spBaseFolderRegEx = new RegExp(decodeURIComponent(this.options.spBaseFolder), 'gi');
+      const spBaseFolderRegEx = new RegExp(decodeURIComponent('^' + this.options.spBaseFolder), 'gi');
       let spFilePathRelative = decodeURIComponent(spFilePath);
       if (['', '/'].indexOf(this.options.spBaseFolder) === -1) {
         spFilePathRelative = decodeURIComponent(spFilePath).replace(spBaseFolderRegEx, '');
