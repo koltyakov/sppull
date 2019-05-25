@@ -4,6 +4,7 @@
 
 [![npm version](https://badge.fury.io/js/sppull.svg)](https://badge.fury.io/js/sppull)
 [![Downloads](https://img.shields.io/npm/dm/sppull.svg)](https://www.npmjs.com/package/sppull)
+![Build Status](https://koltyakov.visualstudio.com/SPNode/_apis/build/status/sppull?branchName=master)
 [![Gitter](https://badges.gitter.im/gitterHQ/gitter.png)](https://gitter.im/sharepoint-node/Lobby)
 
 Node.js module for downloading files from SharePoint document libraries.
@@ -28,6 +29,7 @@ Smart re-download mechanism. Existing files with no changes are ignored from the
 - SharePoint Online
 - SharePoint 2013
 - SharePoint 2016
+- SharePoint 2019
 
 ## How to use
 
