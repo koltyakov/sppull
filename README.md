@@ -136,9 +136,9 @@ Refer to the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Sc
 ### Basic usage
 
 ```javascript
-var sppull = require("sppull").sppull;
+const { sppull } = require("sppull");
 
-var context = {
+const context = {
   siteUrl: "http://contoso.sharepoint.com/subsite",
   creds: {
     username: "user@contoso.com",
@@ -146,7 +146,7 @@ var context = {
   }
 };
 
-var options = {
+const options = {
   spRootFolder: "Shared%20Documents/Contracts",
   dlRootFolder: "./Downloads/Contracts"
 };
@@ -157,11 +157,11 @@ var options = {
  * Folders structure will remain original as it is in SharePoint's target folder.
 */
 sppull(context, options)
-  .then(function(downloadResults) {
+  .then((downloadResults) => {
     console.log("Files are downloaded");
     console.log("For more, please check the results", JSON.stringify(downloadResults));
   })
-  .catch(function(err) {
+  .catch((err) => {
     console.log("Core error has happened", err);
   });
 ```
