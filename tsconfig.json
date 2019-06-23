@@ -10,6 +10,7 @@
     "removeComments": true,
     "newLine": "LF",
     "skipLibCheck": true,
+    "strict": false,
     "types": ["node", "mocha"],
     "outDir": "dist"
   },

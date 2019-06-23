@@ -9,6 +9,7 @@ import { getAuth } from 'node-sp-auth';
 
 import { Utils } from './../utils';
 import { ISPPullOptions, ISPPullContext, IFileBasicMetadata } from '../interfaces';
+import { IContent, IFile, IFolder } from '../interfaces/content';
 
 export default class RestAPI {
 
@@ -18,7 +19,7 @@ export default class RestAPI {
   private agent: https.Agent;
   private utils: Utils;
 
-  constructor (context: ISPPullContext, options: ISPPullOptions) {
+  constructor(context: ISPPullContext, options: ISPPullOptions) {
     this.context = context;
     this.options = {
       ...options,
@@ -33,7 +34,7 @@ export default class RestAPI {
     });
   }
 
-  public downloadFile = (spFilePath: string, metadata?: IFileBasicMetadata): Promise<any> => {
+  public downloadFile(spFilePath: string, metadata?: IFileBasicMetadata): Promise<string> {
     return new Promise((resolve, reject) => {
       this.spr = this.getCachedRequest();
 
@@ -54,7 +55,7 @@ export default class RestAPI {
 
         const saveFolderPath = path.dirname(saveFilePath);
 
-        mkdirp(saveFolderPath, err => {
+        mkdirp(saveFolderPath, (err) => {
           if (err) {
             console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err));
             return reject(err);
@@ -74,10 +75,8 @@ export default class RestAPI {
 
             // Download using streaming
             this.downloadAsStream(spFilePath, saveFilePath)
-              .then(() => {
-                resolve(saveFilePath);
-              })
-              .catch(error => {
+              .then(() => resolve(saveFilePath))
+              .catch((error) => {
                 console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
                 reject(error);
               });
@@ -89,7 +88,7 @@ export default class RestAPI {
             // Download using sp-request, without streaming, consumes lots of memory in case of large files
             this.downloadSimple(spFilePath, saveFilePath)
               .then(() => resolve(saveFilePath))
-              .catch(error => {
+              .catch((error) => {
                 console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
                 reject(error);
               });
@@ -104,7 +103,7 @@ export default class RestAPI {
     });
   }
 
-  public getFolderContent = async (spRootFolder: string): Promise<any> => {
+  public async getFolderContent(spRootFolder: string): Promise<IContent> {
     let restUrl: string;
     this.spr = this.getCachedRequest();
 
@@ -143,20 +142,19 @@ export default class RestAPI {
     }
 
     return new Promise((resolve, reject) => {
-
       this.spr.get(restUrl, {
         agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
       })
-        .then(response => {
+        .then((response) => {
           const results = {
-            folders: (response.body.d.Folders.results || []).filter(folder => {
+            folders: (response.body.d.Folders.results || []).filter((folder) => {
               if (folderInDocLibrary) {
                 return typeof folder.ListItemAllFields.Id !== 'undefined';
               } else {
                 return true;
               }
             }),
-            files: (response.body.d.Files.results || []).map(file => {
+            files: (response.body.d.Files.results || []).map((file) => {
               if (folderInDocLibrary) {
                 return {
                   ...file,
@@ -179,18 +177,18 @@ export default class RestAPI {
           };
           resolve(results);
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(colors.red.bold('\nError in getFolderContent:'), colors.red(err.message));
           reject(err.message);
         });
     });
   }
 
-  public getContentWithCaml = (): Promise<any> => {
+  public getContentWithCaml(): Promise<IContent> {
     return new Promise((resolve, reject) => {
       this.spr = this.getCachedRequest();
       this.spr.requestDigest(this.context.siteUrl)
-        .then(digest => {
+        .then((digest) => {
           let restUrl = this.utils.trimMultiline(`
             ${this.context.siteUrl}/_api/Web/GetList(@DocLibUrl)/GetItems
               ?$select=##MetadataSrt#
@@ -198,7 +196,7 @@ export default class RestAPI {
               &@DocLibUrl='${this.utils.escapeURIComponent(this.options.spDocLibUrl)}'
           `);
 
-          let metadataStr: string = this.options.metaFields.map(fieldName => {
+          let metadataStr: string = this.options.metaFields.map((fieldName) => {
             return `Files/ListItemAllFields/${fieldName}`;
           }).join(',');
 
@@ -225,10 +223,10 @@ export default class RestAPI {
             agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
           });
         })
-        .then(response => {
-          const filesData = [];
-          const foldersData = [];
-          response.body.d.results.forEach(item => {
+        .then((response) => {
+          const filesData: IFile[] = [];
+          const foldersData: IFolder[] = [];
+          response.body.d.results.forEach((item) => {
             item.metadata = this.options.metaFields.reduce((meta, field) => {
               if (item.hasOwnProperty(field)) {
                 meta[field] = item[field];
@@ -242,53 +240,53 @@ export default class RestAPI {
               foldersData.push(item);
             }
           });
-          const results = {
+          const results: IContent = {
             files: filesData,
             folders: foldersData
           };
           resolve(results);
         })
-        .catch(err => {
+        .catch((err) => {
           console.log(colors.red.bold('\nError in getContentWithCaml:'), colors.red(err.message));
           reject(err.message);
         });
     });
   }
 
-  private checkIfFolderInDocLibrary = (spFolder: string): Promise<boolean> => {
-    return new Promise(resolve => {
-      this.spr = this.getCachedRequest();
+  private checkIfFolderInDocLibrary(spFolder: string): Promise<boolean> {
+    this.spr = this.getCachedRequest();
 
-      if (spFolder.charAt(spFolder.length - 1) === '/') {
-        spFolder = spFolder.substring(0, spFolder.length - 1);
-      }
+    if (spFolder.charAt(spFolder.length - 1) === '/') {
+      spFolder = spFolder.substring(0, spFolder.length - 1);
+    }
 
-      const restUrl = this.utils.trimMultiline(`
-        ${this.context.siteUrl}/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)/listItemAllFields
-          ?@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spFolder)}'
-      `);
+    const restUrl = this.utils.trimMultiline(`
+      ${this.context.siteUrl}/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)/listItemAllFields
+        ?@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spFolder)}'
+    `);
 
+    return new Promise((resolve, reject) => {
       this.spr.get(restUrl, {
         agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
       })
-        .then(_ => resolve(true))
-        .catch(_ => resolve(false));
+        .then(() => resolve(true))
+        .catch(() => reject(false));
     });
   }
 
-  private downloadAsStream = (spFilePath: string, saveFilePath: string): Promise<string> => {
+  private downloadAsStream(spFilePath: string, saveFilePath: string): Promise<string> {
+    const restUrl: string = `${this.context.siteUrl}/_api/Web/` +
+      `GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
+      `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
+
+    let envProcessHeaders = {};
+    try {
+      envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
+    } catch (ex) { /**/ }
+
     return new Promise((resolve, reject) => {
-      const restUrl: string =
-        `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
-        `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
-
-      let envProcessHeaders = {};
-      try {
-        envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
-      } catch (ex) { /**/ }
-
       getAuth(this.context.siteUrl, this.context.creds)
-        .then(auth => {
+        .then((auth) => {
           const options: request.OptionsWithUrl = {
             url: restUrl,
             method: 'GET',
@@ -312,19 +310,19 @@ export default class RestAPI {
     });
   }
 
-  private downloadSimple = (spFilePath: string, saveFilePath: string): Promise<string> => {
+  private downloadSimple(spFilePath: string, saveFilePath: string): Promise<string> {
+    const restUrl: string = `${this.context.siteUrl}/_api/Web/` +
+      `GetFileByServerRelativeUrl(@FileServerRelativeUrl)/OpenBinaryStream` +
+      `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
+
+    let envProcessHeaders = {};
+    try {
+      envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
+    } catch (ex) { /**/ }
+
     return new Promise((resolve, reject) => {
-      const restUrl: string =
-        `${this.context.siteUrl}/_api/Web/GetFileByServerRelativeUrl(@FileServerRelativeUrl)/OpenBinaryStream` +
-        `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
-
-      let envProcessHeaders = {};
-      try {
-        envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
-      } catch (ex) { /**/ }
-
       getAuth(this.context.siteUrl, this.context.creds)
-        .then(auth => {
+        .then((auth) => {
           const options: request.OptionsWithUrl = {
             url: restUrl,
             method: 'GET',
@@ -345,11 +343,10 @@ export default class RestAPI {
             .on('finish', () => resolve(saveFilePath));
         })
         .catch(reject);
-
     });
   }
 
-  private needToDownload = (saveFilePath: string, metadata?: IFileBasicMetadata): boolean => {
+  private needToDownload(saveFilePath: string, metadata?: IFileBasicMetadata): boolean {
     let stats: fs.Stats = null;
     let needDownload: boolean = true;
 
@@ -378,7 +375,7 @@ export default class RestAPI {
     return needDownload;
   }
 
-  private getCachedRequest = (): sprequest.ISPRequest => {
+  private getCachedRequest() {
     return this.spr || sprequest.create(this.context.creds);
   }
 

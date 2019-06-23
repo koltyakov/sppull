@@ -2,139 +2,68 @@ import * as path from 'path';
 import * as mkdirp from 'mkdirp';
 import * as colors from 'colors';
 import * as readline from 'readline';
+import { URL } from 'url';
 
 import RestAPI from './api';
-import { ISPPullOptions, ISPPullContext, IFileBasicMetadata } from './interfaces';
+import { ISPPullOptions, ISPPullContext, IFileBasicMetadata, ICtx } from './interfaces';
+import { IContent, IFolder } from './interfaces/content';
 
 export class Download {
 
-  private context: ISPPullContext;
-  private options: ISPPullOptions;
-  private restApi: RestAPI;
+  public sppull = (context: ISPPullContext, options: ISPPullOptions) => {
 
-  public sppull = (context: ISPPullContext, options: ISPPullOptions): Promise<any> => {
+    // Apply defeults
+    options = this.initOptions(context, options);
 
-    this.context = context;
-    this.options = options;
-
-    if (typeof this.context.creds === 'undefined') {
-      this.context.creds = {
-        ...(this.context as any)
-      };
-    }
-
-    this.options.spHostName = this.context.siteUrl
-      .replace('http://', '')
-      .replace('https://', '')
-      .split('/')[0];
-
-    this.options.spRelativeBase = this.context.siteUrl
-      .replace('http://', '')
-      .replace('https://', '')
-      .replace(this.options.spHostName, '');
-
-    if (this.options.spRootFolder) {
-      if (this.options.spRootFolder.indexOf(this.options.spRelativeBase) !== 0) {
-        this.options.spRootFolder = (this.options.spRelativeBase + '/' + this.options.spRootFolder).replace(/\/\//g, '/');
-      } else {
-        if (this.options.spRootFolder.charAt(0) !== '/') {
-          this.options.spRootFolder = '/' + this.options.spRootFolder;
-        }
-      }
-    }
-
-    if (this.options.spBaseFolder) {
-      if (this.options.spBaseFolder.indexOf(this.options.spRelativeBase) !== 0) {
-        this.options.spBaseFolder = (this.options.spRelativeBase + '/' + this.options.spBaseFolder).replace(/\/\//g, '/');
-      }
-    } else {
-      this.options.spBaseFolder = this.options.spRootFolder;
-    }
-
-    this.options.dlRootFolder = this.options.dlRootFolder || './Downloads';
-
-    if (typeof this.options.recursive === 'undefined') {
-      this.options.recursive = true;
-    }
-
-    if (typeof this.options.foderStructureOnly === 'undefined') {
-      this.options.foderStructureOnly = false;
-    }
-
-    if (typeof this.options.createEmptyFolders === 'undefined') {
-      this.options.createEmptyFolders = true;
-    }
-
-    if (typeof this.options.metaFields === 'undefined') {
-      this.options.metaFields = [];
-    }
-
-    if (typeof this.options.restCondition === 'undefined') {
-      this.options.restCondition = '';
-    }
-
-    if (this.options.spDocLibUrl) {
-      if (this.options.spDocLibUrl.indexOf(this.options.spRelativeBase) !== 0) {
-        this.options.spDocLibUrl = (this.options.spRelativeBase + '/' + this.options.spDocLibUrl).replace(/\/\//g, '/');
-      } else {
-        if (this.options.spDocLibUrl.charAt(0) !== '/') {
-          this.options.spDocLibUrl = '/' + this.options.spDocLibUrl;
-        }
-      }
-      this.options.spDocLibUrl = encodeURIComponent(this.options.spDocLibUrl);
-    }
-
-    if (typeof this.options.muteConsole === 'undefined') {
-      this.options.muteConsole = false;
-    }
-
-    // Defaults <<<
-
-    this.restApi = new RestAPI(this.context, this.options);
+    const ctx: ICtx = {
+      context,
+      options,
+      api: new RestAPI(context, options)
+    };
 
     if (
-      typeof this.options.camlCondition !== 'undefined' && this.options.camlCondition !== '' &&
-      typeof this.options.spDocLibUrl !== 'undefined' && this.options.spDocLibUrl !== ''
+      typeof options.camlCondition !== 'undefined' && options.camlCondition !== '' &&
+      typeof options.spDocLibUrl !== 'undefined' && options.spDocLibUrl !== ''
     ) {
-      return this.runDownloadCamlObjects();
+      return this.runDownloadCamlObjects(ctx);
     } else {
-      if (typeof this.options.strictObjects !== 'undefined' && Array.isArray([this.options.strictObjects])) {
-        this.options.strictObjects.forEach((strictObject, i) => {
+      if (typeof options.strictObjects !== 'undefined' && Array.isArray([options.strictObjects])) {
+        options.strictObjects.forEach((strictObject, i) => {
           if (typeof strictObject === 'string') {
-            if (strictObject.indexOf(this.options.spRootFolder) !== 0) {
-              strictObject = (this.options.spRootFolder + '/' + strictObject).replace(/\/\//g, '/');
+            if (strictObject.indexOf(options.spRootFolder) !== 0) {
+              strictObject = (options.spRootFolder + '/' + strictObject).replace(/\/\//g, '/');
             }
-            this.options.strictObjects[i] = strictObject;
+            options.strictObjects[i] = strictObject;
           }
         });
-        return this.runDownloadStrictObjects();
+        return this.runDownloadStrictObjects(ctx);
       } else {
-        if (!this.options.foderStructureOnly) {
-          if (this.options.recursive) {
-            return this.runDownloadFilesRecursively();
+        if (!options.foderStructureOnly) {
+          if (options.recursive) {
+            return this.runDownloadFilesRecursively(ctx);
           } else {
-            return this.runDownloadFilesFlat();
+            return this.runDownloadFilesFlat(ctx);
           }
         } else {
-          return this.runCreateFoldersRecursively();
+          return this.runCreateFoldersRecursively(ctx);
         }
       }
 
     }
   }
 
-  private createFolder = (spFolderPath: string, spBaseFolder: string, downloadRoot: string): Promise<any> => {
+  private createFolder(ctx: ICtx, spFolderPath: string, downloadRoot: string): Promise<string> {
     return new Promise((resolve, reject) => {
 
-      const spBaseFolderRegEx = new RegExp(decodeURIComponent(this.options.spBaseFolder), 'gi');
+      const spBaseFolderRegEx = new RegExp(decodeURIComponent(ctx.options.spBaseFolder), 'gi');
       let spFolderPathRelative = decodeURIComponent(spFolderPath);
-      if (['', '/'].indexOf(this.options.spBaseFolder) === -1) {
+      if (['', '/'].indexOf(ctx.options.spBaseFolder) === -1) {
         spFolderPathRelative = decodeURIComponent(spFolderPath).replace(spBaseFolderRegEx, '');
       }
 
       const saveFolderPath: string = path.join(downloadRoot, spFolderPathRelative);
 
-      mkdirp(saveFolderPath, err => {
+      mkdirp(saveFolderPath, (err) => {
         if (err) {
           console.log(colors.red.bold('Error creating folder ' + '`' + saveFolderPath + ' `'), colors.red(err));
           reject(err);
@@ -145,229 +74,235 @@ export class Download {
   }
 
   // Queues >>>>
-  private createFoldersQueue = (foldersList: any[], index: number = 0): Promise<any> => {
-    return new Promise((resolve, reject) => {
-      const spFolderPath = foldersList[index].ServerRelativeUrl;
-      const spBaseFolder = this.options.spBaseFolder;
-      const downloadRoot = this.options.dlRootFolder;
+  private async createFoldersQueue(ctx: ICtx, foldersList: IFolder[], index: number = 0): Promise<IFolder[]> {
+    const spFolderPath: string = foldersList[index].ServerRelativeUrl;
+    const downloadRoot = ctx.options.dlRootFolder;
 
-      if (!this.options.muteConsole) {
-        readline.clearLine(process.stdout, 0);
-        readline.cursorTo(process.stdout, 0, null);
-        process.stdout.write(colors.green.bold('Creating folders: ') + (index + 1) + ' out of ' + foldersList.length);
+    if (!ctx.options.muteConsole) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0, undefined);
+      process.stdout.write(colors.green.bold('Creating folders: ') + (index + 1) + ' out of ' + foldersList.length);
+    }
+
+    const localFolderPath = await this.createFolder(ctx, spFolderPath, downloadRoot);
+    foldersList[index].SavedToLocalPath = localFolderPath;
+    index += 1;
+    if (index < foldersList.length) {
+      return this.createFoldersQueue(ctx, foldersList, index);
+    } else {
+      if (!ctx.options.muteConsole) {
+        process.stdout.write('\n');
       }
-
-      this.createFolder(spFolderPath, spBaseFolder, downloadRoot)
-        .then((localFolderPath: string) => {
-          foldersList[index].SavedToLocalPath = localFolderPath;
-          index += 1;
-          if (index < foldersList.length) {
-            resolve(this.createFoldersQueue(foldersList, index));
-          } else {
-            if (!this.options.muteConsole) {
-              process.stdout.write('\n');
-            }
-            resolve(foldersList);
-          }
-        })
-        .catch(reject);
-    });
+      return foldersList;
+    }
   }
 
-  private downloadFilesQueue = (filesList: IFileBasicMetadata[], index: number = 0): Promise<any> => {
-    return new Promise((resolve, reject) => {
-      const spFilePath = filesList[index].ServerRelativeUrl;
-      if (!this.options.muteConsole) {
-        readline.clearLine(process.stdout, 0);
-        readline.cursorTo(process.stdout, 0, null);
-        process.stdout.write(colors.green.bold('Downloading files: ') + (index + 1) + ' out of ' + filesList.length);
+  private async downloadFilesQueue(ctx: ICtx, filesList: IFileBasicMetadata[], index: number = 0): Promise<IFileBasicMetadata[]> {
+    const spFilePath = filesList[index].ServerRelativeUrl;
+    if (!ctx.options.muteConsole) {
+      readline.clearLine(process.stdout, 0);
+      readline.cursorTo(process.stdout, 0, undefined);
+      process.stdout.write(colors.green.bold('Downloading files: ') + (index + 1) + ' out of ' + filesList.length);
+    }
+    const localFilePath = await ctx.api.downloadFile(spFilePath, filesList[index]);
+    filesList[index].SavedToLocalPath = localFilePath;
+    index += 1;
+    if (index < filesList.length) {
+      return this.downloadFilesQueue(ctx, filesList, index);
+    } else {
+      if (!ctx.options.muteConsole) {
+        process.stdout.write('\n');
       }
-      this.restApi.downloadFile(spFilePath, filesList[index])
-        .then(localFilePath => {
-          filesList[index].SavedToLocalPath = localFilePath;
-          index += 1;
-          if (index < filesList.length) {
-            resolve(this.downloadFilesQueue(filesList, index));
-          } else {
-            if (!this.options.muteConsole) {
-              process.stdout.write('\n');
-            }
-            resolve(filesList);
-          }
-        })
-        .catch(reject);
-    });
+      return filesList;
+    }
   }
 
-  private getStructureRecursive = (root: boolean = true, foldersQueue: any[] = [], filesList: any[] = []): Promise<any> => {
-    return new Promise((resolve, reject) => {
-      let exitQueue = true;
-      if (typeof this.options.spRootFolder === 'undefined' || this.options.spRootFolder === '') {
-        reject('The `spRootFolder` property should be provided in options.');
-      }
-      let spRootFolder;
+  private async getStructureRecursive(ctx: ICtx, root: boolean = true, foldersQueue: any[] = [], filesList: any[] = []): Promise<IContent> {
+    let exitQueue = true;
+    if (typeof ctx.options.spRootFolder === 'undefined' || ctx.options.spRootFolder === '') {
+      throw Error('The `spRootFolder` property should be provided in options.');
+    }
+    let spRootFolder;
 
-      if (foldersQueue.length === 0) {
-        spRootFolder = this.options.spRootFolder;
-        exitQueue = !root; // false;
-      } else {
-        foldersQueue.some(fi => {
-          if (typeof fi.processed === 'undefined') {
-            fi.processed = false;
-          }
-          if (!fi.processed) {
-            spRootFolder = fi.serverRelativeUrl;
-            fi.processed = true;
-            exitQueue = false;
-            return true;
-          }
-          return false;
-        });
-      }
-
-      if (!exitQueue) {
-        let cntInQueue = 0;
-        foldersQueue.forEach((folder) => {
-          if (folder.processed) {
-            cntInQueue += 1;
-          }
-        });
-
-        if (!this.options.muteConsole) {
-          readline.clearLine(process.stdout, 0);
-          readline.cursorTo(process.stdout, 0, null);
-          process.stdout.write(colors.green.bold('Folders proceeding: ') + cntInQueue + ' out of ' + foldersQueue.length + colors.gray(' [recursive scanning...]'));
+    if (foldersQueue.length === 0) {
+      spRootFolder = ctx.options.spRootFolder;
+      exitQueue = !root; // false;
+    } else {
+      foldersQueue.some((fi) => {
+        if (typeof fi.processed === 'undefined') {
+          fi.processed = false;
         }
-
-        this.restApi.getFolderContent(spRootFolder)
-          .then(results => {
-            (results.folders || []).forEach((folder) => {
-              const folderElement = {
-                folder: folder,
-                serverRelativeUrl: folder.ServerRelativeUrl,
-                processed: false
-              };
-              foldersQueue.push(folderElement);
-            });
-            filesList = filesList.concat(results.files || []);
-            resolve(this.getStructureRecursive(false, foldersQueue, filesList));
-          })
-          .catch(reject);
-
-      } else {
-        if (!this.options.muteConsole) {
-          process.stdout.write('\n');
+        if (!fi.processed) {
+          spRootFolder = fi.serverRelativeUrl;
+          fi.processed = true;
+          exitQueue = false;
+          return true;
         }
-        const foldersList = foldersQueue.map((folder) => {
-          return folder.folder;
-        });
-        resolve({
-          files: filesList,
-          folders: foldersList
-        });
+        return false;
+      });
+    }
+
+    if (!exitQueue) {
+      let cntInQueue = 0;
+      foldersQueue.forEach((folder) => {
+        if (folder.processed) {
+          cntInQueue += 1;
+        }
+      });
+
+      if (!ctx.options.muteConsole) {
+        readline.clearLine(process.stdout, 0);
+        readline.cursorTo(process.stdout, 0, undefined);
+        process.stdout.write(colors.green.bold('Folders proceeding: ') + cntInQueue + ' out of ' + foldersQueue.length + colors.gray(' [recursive scanning...]'));
       }
-    });
+
+      const results = await ctx.api.getFolderContent(spRootFolder);
+      (results.folders || []).forEach((folder) => {
+        const folderElement = {
+          folder: folder,
+          serverRelativeUrl: folder.ServerRelativeUrl,
+          processed: false
+        };
+        foldersQueue.push(folderElement);
+      });
+      filesList = filesList.concat(results.files || []);
+      return this.getStructureRecursive(ctx, false, foldersQueue, filesList);
+
+    } else {
+      if (!ctx.options.muteConsole) {
+        process.stdout.write('\n');
+      }
+      const foldersList = foldersQueue.map((folder) => {
+        return folder.folder;
+      });
+      return {
+        files: filesList,
+        folders: foldersList
+      };
+    }
   }
 
   // <<<< Queues
 
   // Runners >>>>
-  private runCreateFoldersRecursively = (): Promise<any> => {
-    return this.getStructureRecursive().then(data => {
-      if ((data.folders || []).length > 0) {
-        // let folders: { ServerRelativeUrl: string }[] = data.folders || [];
-        // const { fileRegExp } = this.options;
-        // if (typeof fileRegExp === 'object' && typeof fileRegExp.test === 'function') {
-        //   folders = folders.filter(f => fileRegExp.test(f.ServerRelativeUrl));
-        // }
-        return this.createFoldersQueue(data.folders, 0);
-      } else {
-        return [];
-      }
-    });
+  private async runCreateFoldersRecursively(ctx: ICtx) {
+    const data = await this.getStructureRecursive(ctx);
+    if ((data.folders || []).length > 0) {
+      return this.createFoldersQueue(ctx, data.folders, 0);
+    }
+    return [];
   }
 
-  private downloadMyFilesHandler = (data): Promise<any> => {
+  private async runDownloadFilesRecursively(ctx: ICtx) {
+    const data = await this.getStructureRecursive(ctx);
+    if (ctx.options.createEmptyFolders) {
+      const folders = data.folders || [];
+      if (folders.length > 0) {
+        await this.createFoldersQueue(ctx, folders, 0);
+      }
+    }
+    return this.downloadMyFilesHandler(ctx, data);
+  }
+
+  private async runDownloadFilesFlat(ctx: ICtx) {
+    if (typeof ctx.options.spRootFolder === 'undefined' || ctx.options.spRootFolder === '') {
+      throw Error('The `spRootFolder` property should be provided in options.');
+    }
+    const data = await ctx.api.getFolderContent(ctx.options.spRootFolder);
+    if (ctx.options.createEmptyFolders) {
+      if ((data.folders || []).length > 0) {
+        await this.createFoldersQueue(ctx, data.folders, 0);
+      }
+    }
+    return this.downloadMyFilesHandler(ctx, data);
+  }
+
+  private async runDownloadStrictObjects(ctx: ICtx) {
+    const filesList: IFileBasicMetadata[] = ctx.options.strictObjects
+      .filter((d) => d.split('/').slice(-1).indexOf('.') !== -1)
+      .map((ServerRelativeUrl) => ({ ServerRelativeUrl }));
+
+    if (filesList.length > 0) {
+      return this.downloadFilesQueue(ctx, filesList, 0);
+    }
+    return [];
+  }
+
+  private async runDownloadCamlObjects(ctx: ICtx) {
+    const data = await ctx.api.getContentWithCaml();
+    if (ctx.options.createEmptyFolders) {
+      if ((data.folders || []).length > 0) {
+        await this.createFoldersQueue(ctx, data.folders, 0);
+      }
+    }
+    return this.downloadMyFilesHandler(ctx, data);
+  }
+  // <<<< Runners
+
+  private async downloadMyFilesHandler(ctx: ICtx, data: IContent) {
     let files: { ServerRelativeUrl: string }[] = data.files || [];
-    const { fileRegExp } = this.options;
+    const { fileRegExp } = ctx.options;
     if (typeof fileRegExp === 'object' && typeof fileRegExp.test === 'function') {
       files = files.filter(f => fileRegExp.test(f.ServerRelativeUrl));
     }
     if (files.length > 0) {
-      return Promise.resolve(this.downloadFilesQueue(files, 0));
-    } else {
-      return Promise.resolve([]);
+      return this.downloadFilesQueue(ctx, files, 0);
     }
+    return [];
   }
 
-  private runDownloadFilesRecursively (): Promise<any> {
-    return this.getStructureRecursive().then(async data => {
-      if (this.options.createEmptyFolders) {
-        const folders = data.folders || [];
-        if (folders.length > 0) {
-          await this.createFoldersQueue(folders, 0);
+  private initOptions(context: ISPPullContext, options: ISPPullOptions): ISPPullOptions {
+    if (typeof context.creds === 'undefined') {
+      context.creds = { ...(context as any) };
+    }
+
+    const url = new URL(context.siteUrl);
+
+    options.spHostName = url.hostname;
+    options.spRelativeBase = url.pathname;
+
+    if (options.spRootFolder) {
+      if (options.spRootFolder.indexOf(options.spRelativeBase) !== 0) {
+        options.spRootFolder = (options.spRelativeBase + '/' + options.spRootFolder).replace(/\/\//g, '/');
+      } else {
+        if (options.spRootFolder.charAt(0) !== '/') {
+          options.spRootFolder = '/' + options.spRootFolder;
         }
       }
-      return this.downloadMyFilesHandler(data);
-    });
-  }
-
-  private runDownloadFilesFlat = (): Promise<any> => {
-    if (typeof this.options.spRootFolder === 'undefined' || this.options.spRootFolder === '') {
-      throw new Error('The `spRootFolder` property should be provided in options.');
     }
-    return this.restApi.getFolderContent(this.options.spRootFolder)
-      .then(data => {
-        if (this.options.createEmptyFolders) {
-          if ((data.folders || []).length > 0) {
-            return this.createFoldersQueue(data.folders, 0).then(() => {
-              return this.downloadMyFilesHandler(data);
-            });
-          } else {
-            return this.downloadMyFilesHandler(data);
-          }
-        } else {
-          return this.downloadMyFilesHandler(data);
-        }
-      });
-  }
 
-  private runDownloadStrictObjects = (): Promise<any> => {
-    const filesList: IFileBasicMetadata[] = this.options.strictObjects
-      .filter(d => {
-        const pathArr = d.split('/');
-        return pathArr[pathArr.length - 1].indexOf('.') !== -1;
-      })
-      .map(d => {
-        return {
-          ServerRelativeUrl: d
-        };
-      });
-    if (filesList.length > 0) {
-      return Promise.resolve(this.downloadFilesQueue(filesList, 0));
+    if (options.spBaseFolder) {
+      if (options.spBaseFolder.indexOf(options.spRelativeBase) !== 0) {
+        options.spBaseFolder = (options.spRelativeBase + '/' + options.spBaseFolder).replace(/\/\//g, '/');
+      }
     } else {
-      return Promise.resolve([]);
+      options.spBaseFolder = options.spRootFolder;
     }
-  }
 
-  private runDownloadCamlObjects = (): Promise<any> => {
-    return this.restApi.getContentWithCaml()
-      .then(data => {
-        if (this.options.createEmptyFolders) {
-          if ((data.folders || []).length > 0) {
-            return this.createFoldersQueue(data.folders, 0).then(() => {
-              return this.downloadMyFilesHandler(data);
-            });
-          } else {
-            return this.downloadMyFilesHandler(data);
-          }
-        } else {
-          return this.downloadMyFilesHandler(data);
+    options.dlRootFolder = options.dlRootFolder || './Downloads';
+    options.recursive = typeof options.recursive !== 'undefined' ? options.recursive : true;
+    options.foderStructureOnly = typeof options.foderStructureOnly !== 'undefined' ? options.foderStructureOnly : false;
+    options.createEmptyFolders = typeof options.createEmptyFolders !== 'undefined' ? options.createEmptyFolders : true;
+    options.metaFields = options.metaFields || [];
+    options.restCondition = options.restCondition || '';
+
+    if (options.spDocLibUrl) {
+      if (options.spDocLibUrl.indexOf(options.spRelativeBase) !== 0) {
+        options.spDocLibUrl = (options.spRelativeBase + '/' + options.spDocLibUrl).replace(/\/\//g, '/');
+      } else {
+        if (options.spDocLibUrl.charAt(0) !== '/') {
+          options.spDocLibUrl = '/' + options.spDocLibUrl;
         }
-      });
-  }
+      }
+      options.spDocLibUrl = encodeURIComponent(options.spDocLibUrl);
+    }
 
-  // <<<< Runners
+    if (typeof options.muteConsole === 'undefined') {
+      options.muteConsole = false;
+    }
+
+    return options;
+  }
 
 }
 
