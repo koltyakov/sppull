@@ -219,7 +219,7 @@ export class Download {
 
   private async runDownloadStrictObjects(ctx: ICtx) {
     const filesList: IFileBasicMetadata[] = ctx.options.strictObjects
-      .filter((d) => d.split('/').slice(-1).indexOf('.') !== -1)
+      .filter((d) => d.split('/').slice(-1)[0].indexOf('.') !== -1)
       .map((ServerRelativeUrl) => ({ ServerRelativeUrl }));
 
     if (filesList.length > 0) {
