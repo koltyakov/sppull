@@ -1,0 +1,81 @@
+# Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
+version: v1.13.5
+ignore: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:extend:20180424':
+    - node-sp-auth-config > node-sp-auth > request > extend:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > node-sp-auth-config > node-sp-auth > request > extend:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > request > extend:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > node-sp-auth-config > node-sp-auth > request > extend:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > request > extend:
+        patched: '2019-07-13T19:55:47.203Z'
+  'npm:hoek:20180212':
+    - sppull > sp-request > request > hawk > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - node-sp-auth-config > node-sp-auth > request > hawk > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > request > hawk > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > node-sp-auth-config > node-sp-auth > request > hawk > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > request > hawk > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - node-sp-auth-config > node-sp-auth > request > hawk > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > request > hawk > sntp > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - node-sp-auth-config > node-sp-auth > request > hawk > sntp > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > request > hawk > sntp > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > request > hawk > cryptiles > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > node-sp-auth-config > node-sp-auth > request > hawk > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > node-sp-auth-config > node-sp-auth > request > hawk > sntp > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > request > hawk > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - node-sp-auth-config > node-sp-auth > request > hawk > cryptiles > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > node-sp-auth-config > node-sp-auth > request > hawk > cryptiles > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > request > hawk > cryptiles > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > node-sp-auth-config > node-sp-auth > request > hawk > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > node-sp-auth-config > node-sp-auth > request > hawk > sntp > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > node-sp-auth-config > node-sp-auth > request > hawk > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > node-sp-auth-config > node-sp-auth > request > hawk > cryptiles > boom > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > jsonwebtoken > joi > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > jsonwebtoken > joi > topo > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > node-sp-auth-config > node-sp-auth > jsonwebtoken > joi > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > node-sp-auth-config > node-sp-auth > jsonwebtoken > joi > topo > hoek:
+        patched: '2019-07-13T19:55:47.203Z'
+  'npm:moment:20170905':
+    - sppull > sp-request > node-sp-auth > jsonwebtoken > joi > moment:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > node-sp-auth-config > node-sp-auth > jsonwebtoken > joi > moment:
+        patched: '2019-07-13T19:55:47.203Z'
+  'npm:stringstream:20180511':
+    - node-sp-auth-config > node-sp-auth > request > stringstream:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > request > stringstream:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > node-sp-auth-config > node-sp-auth > request > stringstream:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > request > stringstream:
+        patched: '2019-07-13T19:55:47.203Z'
+    - sppull > sp-request > node-sp-auth > node-sp-auth-config > node-sp-auth > request > stringstream:
+        patched: '2019-07-13T19:55:47.203Z'

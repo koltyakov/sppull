@@ -4,14 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "download": "ts-node ./src/index"
+    "download": "ts-node ./src/index",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "node-sp-auth-config": "^2.0.11",
-    "sppull": "^2.2.1"
+    "sppull": "^2.2.1",
+    "snyk": "^1.193.1"
   },
   "devDependencies": {
     "@types/node": "^8.0.47",
@@ -19,5 +22,6 @@
     "tslint": "^5.8.0",
     "typescript": "^2.5.3",
     "tslint-config-standard": "^7.0.0"
-  }
+  },
+  "snyk": true
 }
