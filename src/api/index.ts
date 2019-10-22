@@ -265,12 +265,12 @@ export default class RestAPI {
         ?@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spFolder)}'
     `);
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.spr.get(restUrl, {
         agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
       })
         .then(() => resolve(true))
-        .catch(() => reject(false));
+        .catch(() => resolve(false));
     });
   }
 
