@@ -1,7 +1,7 @@
 {
   "name": "sppull",
   "description": "Download files from SharePoint document libraries using Node.js without hassles",
-  "version": "2.5.0",
+  "version": "2.5.1",
   "author": "Andrew Koltyakov <andrew.koltyakov@gmail.com>",
   "main": "./dist/index.js",
   "typings": "./dist/index",
@@ -39,17 +39,17 @@
     "@types/chai": "^4.2.3",
     "@types/core-js": "^2.5.2",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.7.11",
+    "@types/node": "^12.11.2",
     "@types/request": "^2.48.3",
     "chai": "^4.2.0",
     "cpass": "^2.2.0",
-    "dotenv": "^8.1.0",
-    "mocha": "^6.2.1",
+    "dotenv": "^8.2.0",
+    "mocha": "^6.2.2",
     "rimraf": "^3.0.0",
-    "spsave": "^3.1.5",
+    "spsave": "^3.1.6",
     "ts-node": "^8.4.1",
     "tslint": "^5.20.0",
     "tslint-config-standard": "^8.0.1",
-    "typescript": "^3.6.3"
+    "typescript": "^3.6.4"
   }
 }

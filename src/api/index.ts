@@ -111,7 +111,7 @@ export default class RestAPI {
       spRootFolder = spRootFolder.substring(0, spRootFolder.length - 1);
     }
 
-    const folderInDocLibrary = await this.checkIfFolderInDocLibrary(spRootFolder);
+    const folderInDocLibrary = await this.checkIfFolderInDocLibrary(spRootFolder).catch(() => false);
 
     if (folderInDocLibrary) {
       restUrl = this.utils.trimMultiline(`
@@ -265,12 +265,12 @@ export default class RestAPI {
         ?@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spFolder)}'
     `);
 
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       this.spr.get(restUrl, {
         agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
       })
         .then(() => resolve(true))
-        .catch(() => reject(false));
+        .catch(() => resolve(false));
     });
   }
 
