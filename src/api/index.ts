@@ -253,7 +253,7 @@ export default class RestAPI {
     });
   }
 
-  private checkIfFolderInDocLibrary(spFolder: string): Promise<boolean> {
+  private async checkIfFolderInDocLibrary(spFolder: string): Promise<boolean> {
     this.spr = this.getCachedRequest();
 
     if (spFolder.charAt(spFolder.length - 1) === '/') {
@@ -265,13 +265,15 @@ export default class RestAPI {
         ?@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spFolder)}'
     `);
 
-    return new Promise((resolve) => {
-      this.spr.get(restUrl, {
+    try {
+      await this.spr.get(restUrl, {
         agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
-      })
-        .then(() => resolve(true))
-        .catch(() => resolve(false));
-    });
+      });
+      return true; // no error: inside some document library, listItemAllFields-Requested worked
+    }
+    catch {
+      return false; // error: outside of document library, listItemAllFields-Requested failed
+    }
   }
 
   private downloadAsStream(spFilePath: string, saveFilePath: string): Promise<string> {
