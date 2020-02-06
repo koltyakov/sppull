@@ -282,7 +282,6 @@ export class Download {
     options.foderStructureOnly = typeof options.foderStructureOnly !== 'undefined' ? options.foderStructureOnly : false;
     options.createEmptyFolders = typeof options.createEmptyFolders !== 'undefined' ? options.createEmptyFolders : true;
     options.metaFields = options.metaFields || [];
-    options.restCondition = options.restCondition || '';
 
     if (options.spDocLibUrl) {
       if (options.spDocLibUrl.indexOf(options.spRelativeBase) !== 0) {

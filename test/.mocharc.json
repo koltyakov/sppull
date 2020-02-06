@@ -3,5 +3,6 @@
   "watch-extensions": ["ts"],
   "extension": ["ts"],
   "watch-files": ["test/**/*.spec.ts"],
-  "opts": false
+  "opts": false,
+  "recursive": true
 }

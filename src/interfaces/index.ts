@@ -28,7 +28,6 @@ export interface ISPPullOptions {
   foderStructureOnly?: boolean;
   createEmptyFolders?: boolean;
   metaFields?: string[];
-  restCondition?: string;
   muteConsole?: boolean;
   camlCondition?: string;
   spDocLibUrl?: string;
