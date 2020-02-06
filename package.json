@@ -10,8 +10,8 @@
     "tslint": "tslint -p .",
     "tsc": "tsc -p .",
     "clean": "rimraf ./dist",
-    "test": "ts-node ./test/init && mocha --config ./test/.mocharc.json || ECHO.",
-    "test:ci": "mocha --config ./test/.mocharc.json || ECHO."
+    "test": "ts-node ./test/init && mocha --config test/.mocharc.json || ECHO.",
+    "test:ci": "mocha --config test/.mocharc.json --ci || ECHO."
   },
   "bugs": {
     "url": "https://github.com/koltyakov/sppull/issues"
