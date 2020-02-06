@@ -55,47 +55,48 @@ export default class RestAPI {
 
         const saveFolderPath = path.dirname(saveFilePath);
 
-        mkdirp(saveFolderPath, (err) => {
-          if (err) {
+        mkdirp(saveFolderPath)
+          .then(() => {
+
+            // ToDo: Check the most effective approach
+            // vs:
+            //  - memory consumptions
+            //  - speed
+
+            // If a file is greater than 20 MB than use streams
+            // tslint:disable-next-line:radix
+            const filesize: number = parseInt(metadata.Length + '');
+            if (filesize > 20000000) {
+
+              // console.log('Download using streaming');
+
+              // Download using streaming
+              this.downloadAsStream(spFilePath, saveFilePath)
+                .then(() => resolve(saveFilePath))
+                .catch((error) => {
+                  console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
+                  reject(error);
+                });
+
+            } else {
+
+              // console.log('Download simple');
+
+              // Download using sp-request, without streaming, consumes lots of memory in case of large files
+              this.downloadSimple(spFilePath, saveFilePath)
+                .then(() => resolve(saveFilePath))
+                .catch((error) => {
+                  console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
+                  reject(error);
+                });
+
+            }
+
+          })
+          .catch((err) => {
             console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err));
-            return reject(err);
-          }
-
-          // ToDo: Check the most effective approach
-          // vs:
-          //  - memory consumptions
-          //  - speed
-
-          // If a file is greater than 20 MB than use streams
-          // tslint:disable-next-line:radix
-          const filesize: number = parseInt(metadata.Length + '');
-          if (filesize > 20000000) {
-
-            // console.log('Download using streaming');
-
-            // Download using streaming
-            this.downloadAsStream(spFilePath, saveFilePath)
-              .then(() => resolve(saveFilePath))
-              .catch((error) => {
-                console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
-                reject(error);
-              });
-
-          } else {
-
-            // console.log('Download simple');
-
-            // Download using sp-request, without streaming, consumes lots of memory in case of large files
-            this.downloadSimple(spFilePath, saveFilePath)
-              .then(() => resolve(saveFilePath))
-              .catch((error) => {
-                console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
-                reject(error);
-              });
-
-          }
-
-        });
+            reject(err);
+          });
 
       } else {
         resolve(saveFilePath);

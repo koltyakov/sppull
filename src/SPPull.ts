@@ -63,13 +63,12 @@ export class Download {
 
       const saveFolderPath: string = path.join(downloadRoot, spFolderPathRelative);
 
-      mkdirp(saveFolderPath, (err) => {
-        if (err) {
+      mkdirp(saveFolderPath)
+        .then(() => resolve(saveFolderPath))
+        .catch((err) => {
           console.log(colors.red.bold('Error creating folder ' + '`' + saveFolderPath + ' `'), colors.red(err));
           reject(err);
-        }
-        resolve(saveFolderPath);
-      });
+        });
     });
   }
 
