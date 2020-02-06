@@ -12,17 +12,19 @@ const authSettings: IAuthConfigSettings = {
 
 new SPAuthConfigurator(authSettings).getContext()
   .then(({ siteUrl, authOptions }) => {
+    const webRelativeUrl = `/${siteUrl.split('/').slice(3).join('/')}`;
     const pullContext: ISPPullContext = { siteUrl, ...authOptions } as any;
     const pullOptions: ISPPullOptions = {
       spBaseFolder: '/',
-      spRootFolder: 'Shared%20Documents',
+      // spRootFolder: 'Shared%20Documents',
+      spDocLibUrl: `${webRelativeUrl}/Shared Documents`,
       dlRootFolder: join(__dirname, 'Downloads'),
       metaFields: [ 'Title' ],
       camlCondition: `
         <Geq>
           <FieldRef Name='Modified' />
           <Value Type="DateTime">
-              <Today OffsetDays="-30" />
+            <Today OffsetDays="-30" />
           </Value>
         </Geq>
       `

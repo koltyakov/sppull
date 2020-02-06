@@ -194,11 +194,13 @@ export default class RestAPI {
             ${this.context.siteUrl}/_api/Web/GetList(@DocLibUrl)/GetItems
               ?$select=##MetadataSrt#
                 Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeLastModified,Length,ModifiedBy
+              &$expand=Files/ListItemAllFields
               &@DocLibUrl='${this.utils.escapeURIComponent(this.options.spDocLibUrl)}'
           `);
 
           let metadataStr: string = this.options.metaFields.map((fieldName) => {
-            return `Files/ListItemAllFields/${fieldName}`;
+            // return `Files/ListItemAllFields/${fieldName}`;
+            return `${fieldName}`;
           }).join(',');
 
           if (metadataStr.length > 0) {
