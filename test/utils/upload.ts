@@ -49,7 +49,7 @@ const publishAll = async (profiles: IPublishProfile[], context: IAuthContext): P
     checkinType: 1
   };
   for (const profile of profiles) {
-    const files = await walkSync(profile.src, []);
+    const files = walkSync(profile.src, []);
     console.log(`=== Publishing "${profile.dest}" ===`);
     for (const file of files) {
       const fileOptions = {
@@ -57,7 +57,7 @@ const publishAll = async (profiles: IPublishProfile[], context: IAuthContext): P
         fileName: path.basename(file),
         fileContent: fs.readFileSync(file)
       };
-      await spsave(coreOptions, context.authOptions, fileOptions);
+      await Promise.resolve(spsave(coreOptions, context.authOptions, fileOptions));
     }
   }
   return 'Done';
