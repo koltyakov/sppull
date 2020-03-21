@@ -1,4 +1,5 @@
-node_modules
-Downloads
+node_modules/
+Downloads/
+dist/
 config/**/private.json
 config/**/private.*.json
