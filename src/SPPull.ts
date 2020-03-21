@@ -158,7 +158,7 @@ export class Download {
       const results = await ctx.api.getFolderContent(spRootFolder);
       (results.folders || []).forEach((folder) => {
         const folderElement = {
-          folder: folder,
+          folder,
           serverRelativeUrl: folder.ServerRelativeUrl,
           processed: false
         };

@@ -1,8 +1,9 @@
 {
-  "extends": "tslint-config-standard",
+  "extends": "tslint:latest",
   "rules": {
     "semicolon": [true, "always", "ignore-interfaces"],
     "space-before-function-paren": false,
-    "strict-type-predicates": false
+    "strict-type-predicates": false,
+    "no-console": false
   }
 }

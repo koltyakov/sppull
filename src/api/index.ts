@@ -284,6 +284,7 @@ export default class RestAPI {
 
     let envProcessHeaders = {};
     try {
+      // tslint:disable-next-line: no-string-literal
       envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
     } catch (ex) { /**/ }
 
@@ -320,6 +321,7 @@ export default class RestAPI {
 
     let envProcessHeaders = {};
     try {
+      // tslint:disable-next-line: no-string-literal
       envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
     } catch (ex) { /**/ }
 
