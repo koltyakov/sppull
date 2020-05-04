@@ -4,6 +4,7 @@
     "semicolon": [true, "always", "ignore-interfaces"],
     "space-before-function-paren": false,
     "strict-type-predicates": false,
-    "no-console": false
+    "no-console": false,
+    "no-var-requires": false
   }
 }
