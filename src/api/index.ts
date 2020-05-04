@@ -227,9 +227,17 @@ export default class RestAPI {
           });
         })
         .then((response) => {
+          const spRootFolder = this.options.spRootFolder
+            ? decodeURIComponent(this.options.spRootFolder)
+            : undefined;
+
           const filesData: IFile[] = [];
           const foldersData: IFolder[] = [];
           response.body.d.results.forEach((item) => {
+            // Exclude anything outside spRootFolder if provided
+            if (spRootFolder && item.FileRef.indexOf(spRootFolder) !== 0) {
+              return;
+            }
             item.metadata = this.options.metaFields.reduce((meta, field) => {
               if (item.hasOwnProperty(field)) {
                 meta[field] = item[field];

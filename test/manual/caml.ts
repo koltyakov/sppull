@@ -16,7 +16,7 @@ new SPAuthConfigurator(authSettings).getContext()
     const pullContext: ISPPullContext = { siteUrl, ...authOptions } as any;
     const pullOptions: ISPPullOptions = {
       spBaseFolder: '/',
-      // spRootFolder: 'Shared%20Documents',
+      spRootFolder: 'Shared%20Documents/test',
       spDocLibUrl: `${webRelativeUrl}/Shared Documents`,
       dlRootFolder: join(__dirname, 'Downloads'),
       metaFields: [ 'Title' ],
