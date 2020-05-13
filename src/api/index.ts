@@ -193,8 +193,8 @@ export default class RestAPI {
           let restUrl = this.utils.trimMultiline(`
             ${this.context.siteUrl}/_api/Web/GetList(@DocLibUrl)/GetItems
               ?$select=##MetadataSrt#
-                Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeLastModified,Length,ModifiedBy
-              &$expand=Files/ListItemAllFields
+                Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeLastModified,Length,ModifiedBy,File/Length
+              &$expand=Files/ListItemAllFields,File
               &@DocLibUrl='${this.utils.escapeURIComponent(this.options.spDocLibUrl)}'
           `);
 
@@ -246,6 +246,7 @@ export default class RestAPI {
             }, {});
             if (item.FSObjType === 0) {
               item.ServerRelativeUrl = item.FileRef;
+              item.Length = item.File?.Length || '0';
               filesData.push(item);
             } else {
               foldersData.push(item);
