@@ -19,7 +19,7 @@ new SPAuthConfigurator(authSettings).getContext()
       spRootFolder: 'Shared%20Documents/test',
       spDocLibUrl: `${webRelativeUrl}/Shared Documents`,
       dlRootFolder: join(__dirname, 'Downloads'),
-      metaFields: [ 'Title' ],
+      metaFields: [ 'Title', 'CheckoutUserId' ],
       camlCondition: `
         <Geq>
           <FieldRef Name='Modified' />

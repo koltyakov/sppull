@@ -16,7 +16,8 @@ new SPAuthConfigurator(authSettings).getContext()
     const pullOptions: ISPPullOptions = {
       spBaseFolder: '/',
       spRootFolder: 'Shared%20Documents', // 'Shared%20Documents', // 'shared documents', // Should act the same
-      dlRootFolder: join(__dirname, 'Downloads')
+      dlRootFolder: join(__dirname, 'Downloads'),
+      metaFields: ['Title']
     };
     return sppull(pullContext, pullOptions);
   })
