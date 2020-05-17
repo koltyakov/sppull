@@ -103,8 +103,15 @@ export class Download {
       readline.cursorTo(process.stdout, 0, undefined);
       process.stdout.write(colors.green.bold('Downloading files: ') + (index + 1) + ' out of ' + filesList.length);
     }
-    const localFilePath = await ctx.api.downloadFile(spFilePath, filesList[index]);
-    filesList[index].SavedToLocalPath = localFilePath;
+    await ctx.api.downloadFile(spFilePath, filesList[index])
+      .then((localFilePath) => {
+        filesList[index].SavedToLocalPath = localFilePath;
+      })
+      .catch((ex) => {
+        const err = ex.message || ex;
+        console.log('\n', colors.red.bold('\nError in operations.downloadFile:'), colors.red(err));
+        filesList[index].Error = err;
+      });
     index += 1;
     if (index < filesList.length) {
       return this.downloadFilesQueue(ctx, filesList, index);

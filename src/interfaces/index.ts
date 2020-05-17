@@ -10,6 +10,7 @@ export interface IFileBasicMetadata {
   TimeCreated?: string;
   TimeLastModified?: string;
   SavedToLocalPath?: string;
+  Error?: string;
 }
 
 export interface ISPPullContext {

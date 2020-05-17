@@ -34,74 +34,29 @@ export default class RestAPI {
     });
   }
 
-  public downloadFile(spFilePath: string, metadata?: IFileBasicMetadata): Promise<string> {
-    return new Promise((resolve, reject) => {
-      this.spr = this.getCachedRequest();
+  public async downloadFile(spFilePath: string, metadata?: IFileBasicMetadata): Promise<string> {
+    this.spr = this.getCachedRequest();
 
-      const spBaseFolderRegEx = new RegExp(decodeURIComponent('^' + this.options.spBaseFolder), 'gi');
-      let spFilePathRelative = decodeURIComponent(spFilePath);
-      if (['', '/'].indexOf(this.options.spBaseFolder) === -1) {
-        spFilePathRelative = decodeURIComponent(spFilePath).replace(spBaseFolderRegEx, '');
-      }
+    const spBaseFolderRegEx = new RegExp(decodeURIComponent('^' + this.options.spBaseFolder), 'gi');
+    let spFilePathRelative = decodeURIComponent(spFilePath);
+    if (['', '/'].indexOf(this.options.spBaseFolder) === -1) {
+      spFilePathRelative = decodeURIComponent(spFilePath).replace(spBaseFolderRegEx, '');
+    }
 
-      let saveFilePath = path.join(this.options.dlRootFolder, spFilePathRelative);
+    let saveFilePath = path.join(this.options.dlRootFolder, spFilePathRelative);
 
-      if (typeof this.options.omitFolderPath !== 'undefined') {
-        // const omitFolderPath = path.resolve(this.options.omitFolderPath);
-        saveFilePath = path.join(saveFilePath.replace(this.options.omitFolderPath, ''));
-      }
+    if (typeof this.options.omitFolderPath !== 'undefined') {
+      // const omitFolderPath = path.resolve(this.options.omitFolderPath);
+      saveFilePath = path.join(saveFilePath.replace(this.options.omitFolderPath, ''));
+    }
 
-      if (this.needToDownload(saveFilePath, metadata)) {
+    if (this.needToDownload(saveFilePath, metadata)) {
+      const saveFolderPath = path.dirname(saveFilePath);
+      await mkdirp(saveFolderPath);
+      await this.download(spFilePath, saveFilePath);
+    }
 
-        const saveFolderPath = path.dirname(saveFilePath);
-
-        mkdirp(saveFolderPath)
-          .then(() => {
-
-            // ToDo: Check the most effective approach
-            // vs:
-            //  - memory consumptions
-            //  - speed
-
-            // If a file is greater than 20 MB than use streams
-            // tslint:disable-next-line:radix
-            const filesize: number = parseInt(metadata.Length + '');
-            if (filesize > 20000000) {
-
-              // console.log('Download using streaming');
-
-              // Download using streaming
-              this.downloadAsStream(spFilePath, saveFilePath)
-                .then(() => resolve(saveFilePath))
-                .catch((error) => {
-                  console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
-                  reject(error);
-                });
-
-            } else {
-
-              // console.log('Download simple');
-
-              // Download using sp-request, without streaming, consumes lots of memory in case of large files
-              this.downloadSimple(spFilePath, saveFilePath)
-                .then(() => resolve(saveFilePath))
-                .catch((error) => {
-                  console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(error.message));
-                  reject(error);
-                });
-
-            }
-
-          })
-          .catch((err) => {
-            console.log(colors.red.bold('\nError in operations.downloadFile:'), colors.red(err));
-            reject(err);
-          });
-
-      } else {
-        resolve(saveFilePath);
-      }
-    });
+    return saveFilePath;
   }
 
   public async getFolderContent(spRootFolder: string): Promise<IContent> {
@@ -142,127 +97,121 @@ export default class RestAPI {
       `);
     }
 
-    return new Promise((resolve, reject) => {
-      this.spr.get(restUrl, {
-        agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
-      })
-        .then((response) => {
-          const results = {
-            folders: (response.body.d.Folders.results || []).filter((folder) => {
-              if (folderInDocLibrary) {
-                return typeof folder.ListItemAllFields.Id !== 'undefined';
-              } else {
-                return true;
-              }
-            }),
-            files: (response.body.d.Files.results || []).map((file) => {
-              if (folderInDocLibrary) {
-                return {
-                  ...file,
-                  metadata: this.options.metaFields.reduce((meta, field) => {
-                    if (typeof file.ListItemAllFields !== 'undefined') {
-                      if (file.ListItemAllFields.hasOwnProperty(field)) {
-                        meta[field] = file.ListItemAllFields[field];
-                      }
-                    }
-                    return meta;
-                  }, {})
-                };
-              } else {
-                return {
-                  ...file,
-                  metafata: {}
-                };
-              }
-            })
-          };
-          resolve(results);
-        })
-        .catch((err) => {
-          console.log(colors.red.bold('\nError in getFolderContent:'), colors.red(err.message));
-          reject(err.message);
-        });
+    const response = await this.spr.get(restUrl, {
+      agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
     });
-  }
 
-  public getContentWithCaml(): Promise<IContent> {
-    return new Promise((resolve, reject) => {
-      this.spr = this.getCachedRequest();
-      this.spr.requestDigest(this.context.siteUrl)
-        .then((digest) => {
-          let restUrl = this.utils.trimMultiline(`
-            ${this.context.siteUrl}/_api/Web/GetList(@DocLibUrl)/GetItems
-              ?$select=##MetadataSrt#
-                Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeLastModified,Length,ModifiedBy,File/Length
-              &$expand=Files/ListItemAllFields,File
-              &@DocLibUrl='${this.utils.escapeURIComponent(this.options.spDocLibUrl)}'
-          `);
-
-          let metadataStr: string = this.options.metaFields.map((fieldName) => {
-            // return `Files/ListItemAllFields/${fieldName}`;
-            return `${fieldName}`;
-          }).join(',');
-
-          if (metadataStr.length > 0) {
-            metadataStr += ',';
-          }
-
-          restUrl = restUrl.replace(/##MetadataSrt#/g, metadataStr);
-
-          return this.spr.post(restUrl, {
-            body: {
-              query: {
-                __metadata: {
-                  type: 'SP.CamlQuery'
-                },
-                ViewXml: `<View Scope="Recursive"><Query><Where>${this.options.camlCondition}</Where></Query></View>`
-              }
-            },
-            headers: {
-              'X-RequestDigest': digest,
-              'Accept': 'application/json; odata=verbose',
-              'Content-Type': 'application/json; odata=verbose'
-            },
-            agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
-          });
-        })
-        .then((response) => {
-          const spRootFolder = this.options.spRootFolder
-            ? decodeURIComponent(this.options.spRootFolder)
-            : undefined;
-
-          const filesData: IFile[] = [];
-          const foldersData: IFolder[] = [];
-          response.body.d.results.forEach((item) => {
-            // Exclude anything outside spRootFolder if provided
-            if (spRootFolder && item.FileRef.indexOf(spRootFolder) !== 0) {
-              return;
-            }
-            item.metadata = this.options.metaFields.reduce((meta, field) => {
-              if (item.hasOwnProperty(field)) {
-                meta[field] = item[field];
+    const results: IContent = {
+      folders: (response.body.d.Folders.results || []).filter((folder) => {
+        if (folderInDocLibrary) {
+          return typeof folder.ListItemAllFields.Id !== 'undefined';
+        } else {
+          return true;
+        }
+      }),
+      files: (response.body.d.Files.results || []).map((file) => {
+        if (folderInDocLibrary) {
+          return {
+            ...file,
+            metadata: this.options.metaFields.reduce((meta, field) => {
+              if (typeof file.ListItemAllFields !== 'undefined') {
+                if (file.ListItemAllFields.hasOwnProperty(field)) {
+                  meta[field] = file.ListItemAllFields[field];
+                }
               }
               return meta;
-            }, {});
-            if (item.FSObjType === 0) {
-              item.ServerRelativeUrl = item.FileRef;
-              item.Length = item.File?.Length || '0';
-              filesData.push(item);
-            } else {
-              foldersData.push(item);
-            }
-          });
-          const results: IContent = {
-            files: filesData,
-            folders: foldersData
+            }, {})
           };
-          resolve(results);
-        })
-        .catch((err) => {
-          console.log(colors.red.bold('\nError in getContentWithCaml:'), colors.red(err.message));
-          reject(err.message);
-        });
+        } else {
+          return {
+            ...file,
+            metafata: {}
+          };
+        }
+      })
+    };
+
+    return results;
+
+    // .catch((err) => {
+    //   const message = err.message || err;
+    //   console.log(colors.red.bold('\nError in getFolderContent:'), colors.red(message));
+    // });
+  }
+
+  public async getContentWithCaml(): Promise<IContent> {
+    this.spr = this.getCachedRequest();
+    const digest = await this.spr.requestDigest(this.context.siteUrl);
+    let restUrl = this.utils.trimMultiline(`
+      ${this.context.siteUrl}/_api/Web/GetList(@DocLibUrl)/GetItems
+        ?$select=##MetadataSrt#
+          Name,UniqueID,ID,FileDirRef,FileRef,FSObjType,TimeCreated,TimeLastModified,Length,ModifiedBy,File/Length
+        &$expand=Files/ListItemAllFields,File
+        &@DocLibUrl='${this.utils.escapeURIComponent(this.options.spDocLibUrl)}'
+    `);
+
+    let metadataStr: string = this.options.metaFields.map((fieldName) => {
+      // return `Files/ListItemAllFields/${fieldName}`;
+      return `${fieldName}`;
+    }).join(',');
+
+    if (metadataStr.length > 0) {
+      metadataStr += ',';
+    }
+
+    restUrl = restUrl.replace(/##MetadataSrt#/g, metadataStr);
+
+    const response = await this.spr.post(restUrl, {
+      body: {
+        query: {
+          __metadata: {
+            type: 'SP.CamlQuery'
+          },
+          ViewXml: `<View Scope="Recursive"><Query><Where>${this.options.camlCondition}</Where></Query></View>`
+        }
+      },
+      headers: {
+        'X-RequestDigest': digest,
+        'Accept': 'application/json; odata=verbose',
+        'Content-Type': 'application/json; odata=verbose'
+      },
+      agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
     });
+
+    const spRootFolder = this.options.spRootFolder ? decodeURIComponent(this.options.spRootFolder) : undefined;
+
+    const filesData: IFile[] = [];
+    const foldersData: IFolder[] = [];
+    response.body.d.results.forEach((item) => {
+      // Exclude anything outside spRootFolder if provided
+      if (spRootFolder && item.FileRef.indexOf(spRootFolder) !== 0) {
+        return;
+      }
+      item.metadata = this.options.metaFields.reduce((meta, field) => {
+        if (item.hasOwnProperty(field)) {
+          meta[field] = item[field];
+        }
+        return meta;
+      }, {});
+      if (item.FSObjType === 0) {
+        item.ServerRelativeUrl = item.FileRef;
+        item.Length = item.File?.Length || '0';
+        filesData.push(item);
+      } else {
+        foldersData.push(item);
+      }
+    });
+    const results: IContent = {
+      files: filesData,
+      folders: foldersData
+    };
+
+    return results;
+
+    // .catch((err) => {
+    //   const message = err.message || err;
+    //   console.log(colors.red.bold('\nError in getContentWithCaml:'), colors.red(message));
+    // });
   }
 
   private checkIfFolderInDocLibrary(spFolder: string): Promise<boolean> {
@@ -286,46 +235,9 @@ export default class RestAPI {
     });
   }
 
-  private downloadAsStream(spFilePath: string, saveFilePath: string): Promise<string> {
+  private download(spFilePath: string, saveFilePath: string): Promise<string> {
     const restUrl: string = `${this.context.siteUrl}/_api/Web/` +
       `GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
-      `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
-
-    let envProcessHeaders = {};
-    try {
-      // tslint:disable-next-line: no-string-literal
-      envProcessHeaders = JSON.parse(process.env['_sp_request_headers'] || '{}');
-    } catch (ex) { /**/ }
-
-    return new Promise((resolve, reject) => {
-      getAuth(this.context.siteUrl, this.context.creds)
-        .then((auth) => {
-          const options: request.OptionsWithUrl = {
-            url: restUrl,
-            method: 'GET',
-            headers: {
-              ...envProcessHeaders,
-              ...auth.headers,
-              'User-Agent': 'sppull'
-            },
-            encoding: null,
-            strictSSL: false,
-            gzip: true,
-            agent: this.utils.isUrlHttps(this.context.siteUrl) ? this.agent : undefined,
-            ...auth.options
-          };
-          request(options)
-            .pipe(fs.createWriteStream(saveFilePath))
-            .on('error', reject)
-            .on('finish', () => resolve(saveFilePath));
-        })
-        .catch(reject);
-    });
-  }
-
-  private downloadSimple(spFilePath: string, saveFilePath: string): Promise<string> {
-    const restUrl: string = `${this.context.siteUrl}/_api/Web/` +
-      `GetFileByServerRelativeUrl(@FileServerRelativeUrl)/OpenBinaryStream` +
       `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
 
     let envProcessHeaders = {};
