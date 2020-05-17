@@ -2,7 +2,6 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import * as mkdirp from 'mkdirp';
-import * as colors from 'colors';
 import * as sprequest from 'sp-request';
 import * as request from 'request';
 import { getAuth } from 'node-sp-auth';
@@ -18,6 +17,7 @@ export default class RestAPI {
   private spr: sprequest.ISPRequest;
   private agent: https.Agent;
   private utils: Utils;
+  private apiSupportCheck: { [siteUrl: string]: boolean } = {};
 
   constructor(context: ISPPullContext, options: ISPPullOptions) {
     this.context = context;
@@ -68,10 +68,15 @@ export default class RestAPI {
     }
 
     const folderInDocLibrary = await this.checkIfFolderInDocLibrary(spRootFolder).catch(() => false);
+    const isModern = await this.checkModernApisSupport(this.context.siteUrl);
 
     if (folderInDocLibrary) {
       restUrl = this.utils.trimMultiline(`
-        ${this.context.siteUrl}/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)
+        ${this.context.siteUrl}/_api/Web/${
+          isModern
+            ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
+            : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
+        }
           ?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields
           &$select=##MetadataSrt#
             Folders/ListItemAllFields/Id,
@@ -88,7 +93,11 @@ export default class RestAPI {
       restUrl = restUrl.replace(/##MetadataSrt#/g, metadataStr);
     } else {
       restUrl = this.utils.trimMultiline(`
-        ${this.context.siteUrl}/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)
+        ${this.context.siteUrl}/_api/Web/${
+          isModern
+            ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
+            : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
+        }
           ?$expand=Folders,Files
           &$select=
             Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,
@@ -214,15 +223,21 @@ export default class RestAPI {
     // });
   }
 
-  private checkIfFolderInDocLibrary(spFolder: string): Promise<boolean> {
+  private async checkIfFolderInDocLibrary(spFolder: string): Promise<boolean> {
     this.spr = this.getCachedRequest();
 
     if (spFolder.charAt(spFolder.length - 1) === '/') {
       spFolder = spFolder.substring(0, spFolder.length - 1);
     }
 
+    const isModern = await this.checkModernApisSupport(this.context.siteUrl);
+
     const restUrl = this.utils.trimMultiline(`
-      ${this.context.siteUrl}/_api/Web/GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)/listItemAllFields
+      ${this.context.siteUrl}/_api/Web/${
+        isModern
+          ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
+          : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
+      }/listItemAllFields
         ?@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spFolder)}'
     `);
 
@@ -235,10 +250,18 @@ export default class RestAPI {
     });
   }
 
-  private download(spFilePath: string, saveFilePath: string): Promise<string> {
-    const restUrl: string = `${this.context.siteUrl}/_api/Web/` +
+  private async download(spFilePath: string, saveFilePath: string): Promise<string> {
+    const isModern = await this.checkModernApisSupport(this.context.siteUrl);
+
+    let restUrl: string = `${this.context.siteUrl}/_api/Web/` +
       `GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
       `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
+
+    if (isModern) {
+      restUrl = `${this.context.siteUrl}/_api/Web/` +
+        `GetFileByServerRelativePath(DecodedUrl=@FileServerRelativeUrl)/$value` +
+        `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
+    }
 
     let envProcessHeaders = {};
     try {
@@ -303,6 +326,30 @@ export default class RestAPI {
 
   private getCachedRequest() {
     return this.spr || sprequest.create(this.context.creds);
+  }
+
+  // checkModernApisSupport checks is `*ByServerRelativePath` methods exists on environment (were introduced in SPO, 2019)
+  // to use these methods in preference to `*ByServerRelativeUrl` due to support for file and folder names with some special characters
+  private async checkModernApisSupport(siteUrl: string): Promise<boolean> {
+    const resultCache = this.apiSupportCheck[siteUrl.toLocaleLowerCase()];
+    if (typeof resultCache !== 'undefined') {
+      return resultCache;
+    }
+
+    const rootFolder = `/${siteUrl.split('/').slice(3).join('/')}`;
+    const restUrl = `${siteUrl}/_api/Web/GetFolderByServerRelativePath(DecodedUrl=@FolderRelativeUrl)` +
+      `?$select=Id&@FolderRelativeUrl='${this.utils.escapeURIComponent(rootFolder)}'`;
+
+    this.spr = this.getCachedRequest();
+    const result = await this.spr.get(restUrl, {
+      agent: this.utils.isUrlHttps(restUrl) ? this.agent : undefined
+    })
+      .then((resp) => resp.statusCode === 200)
+      .catch(() => false);
+
+    this.apiSupportCheck[siteUrl.toLocaleLowerCase()] = result;
+
+    return result;
   }
 
 }
