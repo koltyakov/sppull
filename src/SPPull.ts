@@ -29,9 +29,10 @@ export class Download {
     } else {
       if (typeof options.strictObjects !== 'undefined' && Array.isArray([options.strictObjects])) {
         options.strictObjects.forEach((strictObject, i) => {
+          const spRootFolder = options.spRootFolder || '';
           if (typeof strictObject === 'string') {
-            if (strictObject.indexOf(options.spRootFolder) !== 0) {
-              strictObject = (options.spRootFolder + '/' + strictObject).replace(/\/\//g, '/');
+            if (strictObject.indexOf(spRootFolder) !== 0) {
+              strictObject = (spRootFolder + '/' + strictObject).replace(/\/\//g, '/');
             }
             options.strictObjects[i] = strictObject;
           }
