@@ -14,10 +14,11 @@ new SPAuthConfigurator(authSettings).getContext()
   .then(({ siteUrl, authOptions }) => {
     const pullContext: ISPPullContext = { siteUrl, ...authOptions } as any;
     const pullOptions: ISPPullOptions = {
-      spRootFolder: "",
+      spRootFolder: '',
       dlRootFolder: join(__dirname, 'Downloads'),
       strictObjects: [
-        `/sites/ci/Shared Documents/gosip's.png`
+        // `/sites/ci/Shared Documents/gosip's.png`
+        `/sites/ci/Shared Documents/apps%.svg`
       ]
     };
     return sppull(pullContext, pullOptions);

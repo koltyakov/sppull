@@ -38,6 +38,7 @@ export default class RestAPI {
     this.spr = this.getCachedRequest();
 
     const spBaseFolderRegEx = new RegExp(decodeURIComponent('^' + this.options.spBaseFolder), 'gi');
+    spFilePath = spFilePath.replace(/%(?![0-9][0-9a-fA-F]+)/g, '%25');
     let spFilePathRelative = decodeURIComponent(spFilePath);
     if (['', '/'].indexOf(this.options.spBaseFolder) === -1) {
       spFilePathRelative = decodeURIComponent(spFilePath).replace(spBaseFolderRegEx, '');

@@ -26,6 +26,10 @@ export class Utils {
 
   public escapeURIComponent = (input: string): string => {
     // return encodeURIComponent(input.replace(/'/g, '%27'));
-    return encodeURIComponent(input.replace(/'/g, `''`));
+    return encodeURIComponent(
+      input
+        .replace(/'/g, `''`)
+        .replace(/%25/g, '%')
+    );
   }
 }
