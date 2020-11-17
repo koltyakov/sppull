@@ -153,7 +153,7 @@ new SPAuthConfigurator().getContext().then(({ siteUrl, authOptions }) => {
     dlRootFolder: './Downloads/Documents'
   };
 
-  sppull(context, options);
+  return sppull(context, options);
 
 }).catch(console.log);
 ```
