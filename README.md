@@ -135,6 +135,34 @@ Refer to the [Scenarios](https://github.com/koltyakov/sppull/tree/master/docs/Sc
 
 ### Basic usage
 
+TypeSctipt:
+
+```typescript
+import { AuthConfig as SPAuthConfigurator } from 'node-sp-auth-config';
+import { ISPPullOptions, ISPPullContext, Download as IDownload } from 'sppull';
+
+new SPAuthConfigurator().getContext().then((context) => {
+
+  const Download: IDownload = require('sppull');
+  const sppull = Download.sppull;
+
+  const context: ISPPullContext = {
+    siteUrl: context.siteUrl,
+    ...context.authOptions
+  } as any;
+
+  const options: ISPPullOptions = {
+    spRootFolder: 'Shared%20Documents',
+    dlRootFolder: './Downloads/Documents'
+  };
+
+  sppull(context, options);
+
+}).catch(console.log);
+```
+
+or ES6:
+
 ```javascript
 const { sppull } = require("sppull");
 
@@ -142,7 +170,8 @@ const context = {
   siteUrl: "http://contoso.sharepoint.com/subsite",
   creds: {
     username: "user@contoso.com",
-    password: "_Password_"
+    password: "_Password_",
+    online: true
   }
 };
 
