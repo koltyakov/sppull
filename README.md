@@ -141,15 +141,12 @@ TypeSctipt:
 import { AuthConfig as SPAuthConfigurator } from 'node-sp-auth-config';
 import { ISPPullOptions, ISPPullContext, Download as IDownload } from 'sppull';
 
-new SPAuthConfigurator().getContext().then((context) => {
+new SPAuthConfigurator().getContext().then(({ siteUrl, authOptions }) => {
 
   const Download: IDownload = require('sppull');
   const sppull = Download.sppull;
 
-  const context: ISPPullContext = {
-    siteUrl: context.siteUrl,
-    ...context.authOptions
-  } as any;
+  const context: ISPPullContext = { siteUrl, creds: ...authOptions };
 
   const options: ISPPullOptions = {
     spRootFolder: 'Shared%20Documents',
