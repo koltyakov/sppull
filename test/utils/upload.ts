@@ -16,11 +16,11 @@ const authConfig = new AuthConfig({
 
 const structureFolder = path.join(__dirname, '../structure');
 const publishProfiles: IPublishProfile[] = fs.readdirSync(structureFolder)
-  .filter(objPath => {
+  .filter((objPath) => {
     const folderPath = path.join(structureFolder, objPath);
     return fs.statSync(folderPath).isDirectory();
   })
-  .map(folder => {
+  .map((folder) => {
     return {
       src: path.join(structureFolder, folder),
       dest: folder
@@ -30,7 +30,7 @@ const publishProfiles: IPublishProfile[] = fs.readdirSync(structureFolder)
 const walkSync = (dir: string, filelist: string[]): string[] => {
   const files = fs.readdirSync(dir);
   filelist = filelist || [];
-  files.forEach(file => {
+  files.forEach((file) => {
     const filePath = path.join(dir, file);
     if (fs.statSync(filePath).isDirectory()) {
       filelist = walkSync(filePath, filelist);
@@ -64,6 +64,6 @@ const publishAll = async (profiles: IPublishProfile[], context: IAuthContext): P
 };
 
 authConfig.getContext()
-  .then(ctx => publishAll(publishProfiles, ctx))
+  .then((ctx) => publishAll(publishProfiles, ctx))
   .then(console.log)
   .catch(console.log);

@@ -3,7 +3,7 @@ import * as fs from 'fs';
 export const deleteFolderRecursive = (path: string): void => {
   if (fs.existsSync(path)) {
     fs.readdirSync(path).forEach((file) => {
-      let curPath = `${path}/${file}`;
+      const curPath = `${path}/${file}`;
       if (fs.lstatSync(curPath).isDirectory()) {
         deleteFolderRecursive(curPath);
       } else {

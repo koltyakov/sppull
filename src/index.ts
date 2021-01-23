@@ -1,6 +1,7 @@
-import { Download } from './SPPull';
+import { SPPull } from './SPPull';
 
-export { ISPPullOptions, ISPPullContext, Download } from './SPPull';
+export { SPPull, ISPPullOptions, ISPPullContext } from './SPPull';
+export { IFileBasicMetadata } from './interfaces';
+export { IFolder } from './interfaces/content';
 
-const sppull = new Download();
-module.exports = sppull;
+export default SPPull;
