@@ -74,10 +74,10 @@ export default class RestAPI {
     if (folderInDocLibrary) {
       restUrl = this.utils.trimMultiline(`
         ${this.context.siteUrl}/_api/Web/${
-          isModern
-            ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
-            : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
-        }
+  isModern
+    ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
+    : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
+}
           ?$expand=Folders,Files,Folders/ListItemAllFields,Files/ListItemAllFields
           &$select=##MetadataSrt#
             Folders/ListItemAllFields/Id,
@@ -85,7 +85,7 @@ export default class RestAPI {
             Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeLastModified,Files/ModifiedBy
           &@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spRootFolder)}'
       `);
-      let metadataStr: string = this.options.metaFields.map(fieldName => {
+      let metadataStr: string = this.options.metaFields.map((fieldName) => {
         return 'Files/ListItemAllFields/' + fieldName;
       }).join(',');
       if (metadataStr.length > 0) {
@@ -95,10 +95,10 @@ export default class RestAPI {
     } else {
       restUrl = this.utils.trimMultiline(`
         ${this.context.siteUrl}/_api/Web/${
-          isModern
-            ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
-            : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
-        }
+  isModern
+    ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
+    : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
+}
           ?$expand=Folders,Files
           &$select=
             Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,
@@ -235,10 +235,10 @@ export default class RestAPI {
 
     const restUrl = this.utils.trimMultiline(`
       ${this.context.siteUrl}/_api/Web/${
-        isModern
-          ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
-          : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
-      }/listItemAllFields
+  isModern
+    ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
+    : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
+}/listItemAllFields
         ?@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spFolder)}'
     `);
 
@@ -255,12 +255,12 @@ export default class RestAPI {
     const isModern = await this.checkModernApisSupport(this.context.siteUrl);
 
     let restUrl: string = `${this.context.siteUrl}/_api/Web/` +
-      `GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value` +
+      'GetFileByServerRelativeUrl(@FileServerRelativeUrl)/$value' +
       `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
 
     if (isModern) {
       restUrl = `${this.context.siteUrl}/_api/Web/` +
-        `GetFileByServerRelativePath(DecodedUrl=@FileServerRelativeUrl)/$value` +
+        'GetFileByServerRelativePath(DecodedUrl=@FileServerRelativeUrl)/$value' +
         `?@FileServerRelativeUrl='${this.utils.escapeURIComponent(spFilePath)}'`;
     }
 
@@ -298,7 +298,7 @@ export default class RestAPI {
 
   private needToDownload(saveFilePath: string, metadata?: IFileBasicMetadata): boolean {
     let stats: fs.Stats = null;
-    let needDownload: boolean = true;
+    let needDownload = true;
 
     if (typeof metadata !== 'undefined') {
       if (fs.existsSync(saveFilePath)) {

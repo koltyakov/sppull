@@ -3,8 +3,8 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { Cpass } from 'cpass';
 
-import { ISPPullOptions, ISPPullContext, Download } from '../../src/SPPull';
-const sppull = new Download().sppull;
+import SPPull, { ISPPullOptions, ISPPullContext } from '../../src';
+
 const cpass = new Cpass();
 
 import { deleteFolderRecursive } from '../utils/utils';
@@ -23,7 +23,10 @@ for (const testConfig of Environments) {
       getAuthCtx(testConfig)
         .then((ctx) => {
           const { siteUrl, authOptions } = ctx;
-          (authOptions as any).password = (authOptions as any).password && cpass.decode((authOptions as any).password);
+          interface WPass { password?: string; }
+          if ((authOptions as WPass).password) {
+            (authOptions as WPass).password = cpass.decode((authOptions as WPass).password);
+          }
           context = { siteUrl, creds: authOptions };
           deleteFolderRecursive(testConfig.dlRootFolder);
           done();
@@ -31,22 +34,18 @@ for (const testConfig of Environments) {
         .catch(done);
     });
 
-    it(`should pull in basic mode`, function(done: Mocha.Done): void {
+    it('should pull in basic mode', function(done: Mocha.Done): void {
       this.timeout(300 * 1000);
-
-      const options: ISPPullOptions = {
+      SPPull.download(context, {
         spRootFolder: testConfig.spRootFolder,
         dlRootFolder: path.join(testConfig.dlRootFolder, 'basic'),
         muteConsole: true
-      };
-
-      sppull(context, options).then(_ => done()).catch(done);
+      }).then(() => done()).catch(done);
     });
 
-    it(`should pull in strict mode`, function(done: Mocha.Done): void {
+    it('should pull in strict mode', function(done: Mocha.Done): void {
       this.timeout(300 * 1000);
-
-      const options: ISPPullOptions = {
+      SPPull.download(context, {
         spRootFolder: '_catalogs/masterpage',
         dlRootFolder: path.join(testConfig.dlRootFolder, 'strict'),
         strictObjects: [
@@ -55,39 +54,31 @@ for (const testConfig of Environments) {
           'v4.master'
         ],
         muteConsole: true
-      };
-
-      sppull(context, options).then(_ => done()).catch(done);
+      }).then(() => done()).catch(done);
     });
 
-    it(`should pull without subfolders data`, function(done: Mocha.Done): void {
+    it('should pull without subfolders data', function(done: Mocha.Done): void {
       this.timeout(100 * 1000);
-
-      const options: ISPPullOptions = {
+      SPPull.download(context, {
         spRootFolder: '_catalogs/masterpage',
         dlRootFolder: path.join(testConfig.dlRootFolder, 'flat'),
         recursive: false,
         createEmptyFolders: false,
         muteConsole: true
-      };
-
-      sppull(context, options).then(_ => done()).catch(done);
+      }).then(() => done()).catch(done);
     });
 
-    it(`should pull folders structure`, function(done: Mocha.Done): void {
+    it('should pull folders structure', function(done: Mocha.Done): void {
       this.timeout(300 * 1000);
-
-      const options: ISPPullOptions = {
+      SPPull.download(context, {
         spRootFolder: '_catalogs/masterpage',
         dlRootFolder: path.join(testConfig.dlRootFolder, 'structure'),
         foderStructureOnly: true,
         muteConsole: true
-      };
-
-      sppull(context, options).then(_ => done()).catch(done);
+      }).then(() => done()).catch(done);
     });
 
-    it(`should pull using caml condition`, function(done: Mocha.Done): void {
+    it('should pull using caml condition', function(done: Mocha.Done): void {
       this.timeout(100 * 1000);
 
       const d = new Date();
@@ -99,17 +90,15 @@ for (const testConfig of Environments) {
         </Eq>
       `;
 
-      const options: ISPPullOptions = {
+      SPPull.download(context, {
         dlRootFolder: path.join(testConfig.dlRootFolder, 'caml'),
         spDocLibUrl: 'Shared Documents',
         camlCondition: camlString,
         muteConsole: true
-      };
-
-      sppull(context, options).then(_ => done()).catch(done);
+      }).then(() => done()).catch(done);
     });
 
-    it(`should pull with additional metadata`, function(done: Mocha.Done): void {
+    it('should pull with additional metadata', function(done: Mocha.Done): void {
       this.timeout(300 * 1000);
 
       const options: ISPPullOptions = {
@@ -120,11 +109,12 @@ for (const testConfig of Environments) {
         muteConsole: true
       };
 
-      sppull(context, options)
-        .then(data => {
+      SPPull.download(context, options)
+        .then((data) => {
+          interface WMeta { metadata?: unknown; }
           fs.writeFileSync(
             path.join(options.dlRootFolder, 'metadata.json'),
-            JSON.stringify(data.map(d => d.metadata), null, 2)
+            JSON.stringify(data.map((d) => (d as WMeta).metadata), null, 2)
           );
           done();
         })

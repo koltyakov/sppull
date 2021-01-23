@@ -9,6 +9,18 @@
 
 Node.js module for downloading files from SharePoint document libraries.
 
+## New in version 2.7.0
+
+- [Breaking change]: Removed legacy module.exports for straightforward usage in modern JS and TypeScript
+
+```typescript
+import SPPull from 'sppull';
+const sppull = SPPull.download; // <-- this is an entry point
+```
+
+- TSLint replaced with ESLint
+- Integration tests are migrated to new version of Mocha and fixed
+
 ## New in version 2.2.0
 
 Files streaming download:
@@ -46,12 +58,12 @@ npm install sppull --save-dev
 ### Usage
 
 ```javascript
-var sppull = require("sppull").sppull;
+const { SPPull } = require('sppull');
 
-var context = {/*...*/};
-var options = {/*...*/};
+const context = {/*...*/};
+const options = {/*...*/};
 
-sppull(context, options)
+SPPull.download(context, options)
   .then(successHandler)
   .catch(errorHandler);
 ```
@@ -139,21 +151,32 @@ TypeSctipt:
 
 ```typescript
 import { AuthConfig as SPAuthConfigurator } from 'node-sp-auth-config';
-import { ISPPullOptions, ISPPullContext, Download as IDownload } from 'sppull';
+import SPPull, { ISPPullOptions, ISPPullContext } from 'sppull';
 
 new SPAuthConfigurator().getContext().then(({ siteUrl, authOptions }) => {
 
+<<<<<<< HEAD
   const Download: IDownload = require('sppull');
   const sppull = Download.sppull;
 
   const context: ISPPullContext = { siteUrl, creds: ...authOptions };
+=======
+  const context: ISPPullContext = {
+    siteUrl: context.siteUrl,
+    ...context.authOptions
+  } as any;
+>>>>>>> dev
 
   const options: ISPPullOptions = {
     spRootFolder: 'Shared%20Documents',
     dlRootFolder: './Downloads/Documents'
   };
 
+<<<<<<< HEAD
   return sppull(context, options);
+=======
+  SPPull.download(context, options);
+>>>>>>> dev
 
 }).catch(console.log);
 ```
@@ -161,7 +184,7 @@ new SPAuthConfigurator().getContext().then(({ siteUrl, authOptions }) => {
 or ES6:
 
 ```javascript
-const { sppull } = require("sppull");
+const { SPPull } = require('sppull');
 
 const context = {
   siteUrl: "http://contoso.sharepoint.com/subsite",
@@ -182,7 +205,7 @@ const options = {
  * to __dirname + /Downloads/Contracts folder.
  * Folders structure will remain original as it is in SharePoint's target folder.
 */
-sppull(context, options)
+SPPull.download(context, options)
   .then((downloadResults) => {
     console.log("Files are downloaded");
     console.log("For more, please check the results", JSON.stringify(downloadResults));

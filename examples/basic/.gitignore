@@ -1,3 +1,7 @@
+
+# just to avoid GitHub annoing dependency checks in a sample
+package-lock.json
+
 node_modules/
 Downloads/
 dist/

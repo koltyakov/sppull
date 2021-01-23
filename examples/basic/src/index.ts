@@ -1,10 +1,7 @@
 import { AuthConfig as SPAuthConfigurator } from 'node-sp-auth-config';
-import { ISPPullOptions, ISPPullContext, Download as IDownload } from 'sppull';
+import SPPull, { ISPPullOptions, ISPPullContext } from 'sppull';
 
 new SPAuthConfigurator().getContext().then((context) => {
-
-  const Download: IDownload = require('sppull');
-  const sppull = Download.sppull;
 
   const pullContext: ISPPullContext = {
     siteUrl: context.siteUrl,
@@ -16,7 +13,7 @@ new SPAuthConfigurator().getContext().then((context) => {
     dlRootFolder: './Downloads/Documents'
   };
 
-  sppull(pullContext, pullOptions);
+  SPPull.download(pullContext, pullOptions);
 
 // tslint:disable-next-line: no-console
 }).catch(console.log);

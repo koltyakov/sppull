@@ -1,10 +1,7 @@
 import { join } from 'path';
 
 import { AuthConfig as SPAuthConfigurator, IAuthConfigSettings } from 'node-sp-auth-config';
-import { ISPPullOptions, ISPPullContext, Download as IDownload } from './../../src';
-
-const Download: IDownload = require(join(__dirname, '../../src'));
-const sppull = Download.sppull;
+import SPPull, { ISPPullOptions, ISPPullContext } from '../../src';
 
 const authSettings: IAuthConfigSettings = {
   configPath: './config/integration/private.spo.json'
@@ -12,17 +9,17 @@ const authSettings: IAuthConfigSettings = {
 
 new SPAuthConfigurator(authSettings).getContext()
   .then(({ siteUrl, authOptions }) => {
-    const pullContext: ISPPullContext = { siteUrl, ...authOptions } as any;
+    const pullContext: ISPPullContext = { siteUrl, creds: authOptions };
     const pullOptions: ISPPullOptions = {
       spRootFolder: '',
       dlRootFolder: join(__dirname, 'Downloads'),
       strictObjects: [
         // `/sites/ci/Shared Documents/gosip's.png`
-        `/sites/ci/Shared Documents/apps%.svg`,
+        '/sites/ci/Shared Documents/apps%.svg',
         '/sites/ci/Shared Documents/spreadsheet1.xlsx'
       ]
     };
-    return sppull(pullContext, pullOptions);
+    return SPPull.download(pullContext, pullOptions);
   })
-  .then(_ => console.log('Done'))
+  .then(() => console.log('Done'))
   .catch(console.log);
