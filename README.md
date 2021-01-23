@@ -155,28 +155,17 @@ import SPPull, { ISPPullOptions, ISPPullContext } from 'sppull';
 
 new SPAuthConfigurator().getContext().then(({ siteUrl, authOptions }) => {
 
-<<<<<<< HEAD
-  const Download: IDownload = require('sppull');
-  const sppull = Download.sppull;
-
-  const context: ISPPullContext = { siteUrl, creds: ...authOptions };
-=======
   const context: ISPPullContext = {
     siteUrl: context.siteUrl,
     ...context.authOptions
   } as any;
->>>>>>> dev
 
   const options: ISPPullOptions = {
     spRootFolder: 'Shared%20Documents',
     dlRootFolder: './Downloads/Documents'
   };
 
-<<<<<<< HEAD
-  return sppull(context, options);
-=======
   SPPull.download(context, options);
->>>>>>> dev
 
 }).catch(console.log);
 ```
