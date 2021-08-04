@@ -11,8 +11,8 @@ const config = {
     sourceType: 'module'
   },
   rules: {
-    quotes: [2, 'single', 'avoid-escape'],
-    indent: ['error', 2],
+    quotes: [2, 'single', { 'allowTemplateLiterals': true }],
+    indent: ['error', 2, { 'ObjectExpression': 1 }],
     'arrow-parens': ['error', 'always'],
     'no-var-requires': 0
   },

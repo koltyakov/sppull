@@ -16,7 +16,7 @@ export class Utils {
     return args.join('/').replace(/(\/)+/g, '/').replace(':/', '://');
   }
 
-  public trimMultiline = (multiline) => {
+  public trimMultiline = (multiline: string): string => {
     return multiline
       .split('\n')
       .map((line) => line.trim())
@@ -28,7 +28,7 @@ export class Utils {
     // return encodeURIComponent(input.replace(/'/g, '%27'));
     return encodeURIComponent(
       input
-        .replace(/'/g, '\'\'')
+        .replace(/'/ig, `''`)
         .replace(/%25/g, '%')
     );
   }
