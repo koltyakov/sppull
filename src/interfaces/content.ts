@@ -1,14 +1,16 @@
 import { IFileBasicMetadata } from './';
 
 export interface IContent {
-  files: IFile[];
-  folders: IFolder[];
+  files: IFileMetadata[];
+  folders: IFolderMetadata[];
 }
 
-export interface IFile extends IFileBasicMetadata {
+export interface IFileMetadata extends IFileBasicMetadata {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [prop: string]: any;
 }
 
-export interface IFolder {
+export interface IFolderMetadata {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [prop: string]: any;
 }

@@ -121,6 +121,7 @@ For more information please check node-sp-auth [credential options](https://gith
 - `createEmptyFolders` - to create empty folders along with documents download task [boolean, optional, default: `true`]
 - `omitFolderPath` - folder path pattern which is omitted from final downloaded files path [string, optional]
 - `muteConsole` - to mute console messages during transport queries to SharePoint API [boolean, optional, default: `false`]
+- `shouldDownloadFile` - a callback to decide if a file should be downloaded based on the metadata [optional, (props) => boolean, default: undefined]
 
 #### Overloads / cases
 

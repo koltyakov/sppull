@@ -8,7 +8,7 @@ import { getAuth } from 'node-sp-auth';
 
 import { Utils } from './../utils';
 import { ISPPullOptions, ISPPullContext, IFileBasicMetadata } from '../interfaces';
-import { IContent, IFile, IFolder } from '../interfaces/content';
+import { IContent, IFileMetadata, IFolderMetadata } from '../interfaces/content';
 
 export default class RestAPI {
 
@@ -190,8 +190,8 @@ export default class RestAPI {
 
     const spRootFolder = this.options.spRootFolder ? decodeURIComponent(this.options.spRootFolder) : undefined;
 
-    const filesData: IFile[] = [];
-    const foldersData: IFolder[] = [];
+    const filesData: IFileMetadata[] = [];
+    const foldersData: IFolderMetadata[] = [];
     response.body.d.results.forEach((item) => {
       // Exclude anything outside spRootFolder if provided
       if (spRootFolder && item.FileRef.indexOf(spRootFolder) !== 0) {

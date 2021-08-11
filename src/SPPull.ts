@@ -6,12 +6,12 @@ import { URL } from 'url';
 
 import RestAPI from './api';
 import { ISPPullOptions, ISPPullContext, IFileBasicMetadata, ICtx } from './interfaces';
-import { IContent, IFolder } from './interfaces/content';
+import { IContent, IFileMetadata, IFolderMetadata } from './interfaces/content';
 import { IAuthOptions } from 'sp-request';
 
 export class SPPull {
 
-  public static async download(context: ISPPullContext, options: ISPPullOptions): Promise<Array<IFileBasicMetadata | IFolder>> {
+  public static async download(context: ISPPullContext, options: ISPPullOptions): Promise<Array<IFileMetadata | IFolderMetadata>> {
 
     // Apply defaults
     options = SPPull.initOptions(context, options);
@@ -73,7 +73,7 @@ export class SPPull {
   }
 
   // Queues >>>>
-  private static async createFoldersQueue(ctx: ICtx, foldersList: IFolder[], index = 0): Promise<IFolder[]> {
+  private static async createFoldersQueue(ctx: ICtx, foldersList: IFolderMetadata[], index = 0): Promise<IFolderMetadata[]> {
     const spFolderPath: string = foldersList[index].ServerRelativeUrl;
     const downloadRoot = ctx.options.dlRootFolder;
 
@@ -96,7 +96,7 @@ export class SPPull {
     }
   }
 
-  private static async downloadFilesQueue(ctx: ICtx, filesList: IFileBasicMetadata[], index = 0): Promise<IFileBasicMetadata[]> {
+  private static async downloadFilesQueue(ctx: ICtx, filesList: IFileMetadata[], index = 0): Promise<IFileMetadata[]> {
     const spFilePath = filesList[index].ServerRelativeUrl;
     if (!ctx.options.muteConsole) {
       readline.clearLine(process.stdout, 0);
@@ -246,9 +246,12 @@ export class SPPull {
 
   private static async downloadMyFilesHandler(ctx: ICtx, data: IContent) {
     let files: { ServerRelativeUrl: string }[] = data.files || [];
-    const { fileRegExp } = ctx.options;
+    const { fileRegExp, shouldDownloadFile } = ctx.options;
     if (typeof fileRegExp === 'object' && typeof fileRegExp.test === 'function') {
       files = files.filter((f) => fileRegExp.test(f.ServerRelativeUrl));
+    }
+    if (typeof shouldDownloadFile === 'function') {
+      files = files.filter(shouldDownloadFile);
     }
     if (files.length > 0) {
       return SPPull.downloadFilesQueue(ctx, files, 0);

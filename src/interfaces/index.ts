@@ -1,5 +1,6 @@
 import { IAuthOptions } from 'node-sp-auth';
 import RestAPI from '../api';
+import { IFileMetadata } from './content';
 
 export interface IFileBasicMetadata {
   ServerRelativeUrl: string;
@@ -34,6 +35,8 @@ export interface ISPPullOptions {
   spDocLibUrl?: string;
   omitFolderPath?: string;
   strictObjects?: string[];
+
+  shouldDownloadFile?: (file: IFileMetadata) => boolean;
 }
 
 export interface ICtx {
