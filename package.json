@@ -30,7 +30,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "colors": "^1.4.0",
+    "colors": "1.4.0",
     "mkdirp": "^1.0.4",
     "node-sp-auth": "^3.0.4",
     "node-sp-auth-config": "^3.0.1",
