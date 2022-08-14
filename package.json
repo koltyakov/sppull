@@ -32,7 +32,7 @@
   "dependencies": {
     "colors": "1.4.0",
     "mkdirp": "^1.0.4",
-    "node-sp-auth": "^3.0.4",
+    "node-sp-auth": "^3.0.6",
     "node-sp-auth-config": "^3.0.1",
     "request": "^2.88.2",
     "sp-request": "^3.0.0"
