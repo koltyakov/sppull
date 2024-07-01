@@ -1,16 +1,20 @@
 # Usage scenarios
 
 ## SPPull initiation
+
 sppull module object should be initiated by requiring node.js module or sources reference first.
+
 ```javascript
 var sppull = require("sppull").sppull;
 // sppull then could be used as a downloading client
 ```
 
 ## Context and authentication
+
 The context object is used to define target SharePoint site and user's credentials.
 It's recommended to take `username` and `password` out of Git stored code.
 Credentials could be stored in process environment variables or any config which is listed in .gitignore exceptions, for instance.   
+
 ```javascript
 var context = {
     siteUrl: "http://contoso.sharepoint.com/subsite",
@@ -20,6 +24,7 @@ var context = {
 ```
 
 For on-prem installations sometimes you have to provide a domain name:
+
 ```javascript
 var context = {
     siteUrl: "http://sharepoint.contoso.com/subsite",
@@ -30,7 +35,9 @@ var context = {
 ```
 
 ## Basic usage
+
 ### Downloaded all files keeping target source folder structure
+
 ```javascript
 var sppull = require("sppull").sppull;
 
@@ -54,10 +61,12 @@ sppull(context, options)
         console.log("Core error has happened", err);
     });
 ```
+
 All examples use the same initiation and it's omitted from the samples.
 Actually if you know options parameters you know all sppull, at least by now.
 
 ### Downloaded files from target source folder explicitly
+
 ```javascript
 var options = {
     spRootFolder: "Shared%20Documents/Contracts",
@@ -67,6 +76,7 @@ var options = {
 ```
 
 ### Recreate locally folders' structure from SharePoint target
+
 ```javascript
 var options = {
     spRootFolder: "Shared%20Documents/Contracts",
@@ -90,11 +100,13 @@ var options = {
     ]
 };
 ```
+
 If a file is sitting within explicitly provided folder, folder settings will be used, as a file setting is a subset of it's parent.
 
 
 <!--
 excludeObjects - array of files and folders relative paths within the `spRootFolder` to exclude from download process, [array of strings, optional]
+
 ### Download files from spRootFolder ignoring some folders and files
 
 > Not implemented yet
@@ -110,6 +122,7 @@ var options = {
     ]
 };
 ```
+
 ### Download files which correspond to a REST filter condition
 
 > Not implemented yet
@@ -140,7 +153,8 @@ var options = {
     camlCondition: camlString
 };
 ```
-`spRootFolder` is ignores when both `spDocLibUrl` and `camlCondition` are in options.
+
+`spRootFolder` is ignored when both `spDocLibUrl` and `camlCondition` are in options.
 `camlCondition` string is placed inside the following CAML `"<View Scope='Recursive'><Query><Where>" + camlString + "</Where></Query></View>"`. View, Query, Where shouldn't be a part of `camlCondition` property. 
 
 ### Download files with their metadata

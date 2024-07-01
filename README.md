@@ -157,8 +157,8 @@ import SPPull, { ISPPullOptions, ISPPullContext } from 'sppull';
 new SPAuthConfigurator().getContext().then(({ siteUrl, authOptions }) => {
 
   const context: ISPPullContext = {
-    siteUrl: context.siteUrl,
-    ...context.authOptions
+    siteUrl,
+    ...authOptions
   } as any;
 
   const options: ISPPullOptions = {
