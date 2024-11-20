@@ -83,7 +83,11 @@ export default class RestAPI {
             Folders/ListItemAllFields/Id,
             Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,
             Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeLastModified,Files/ModifiedBy
-          &@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spRootFolder)}'
+          &@FolderServerRelativeUrl='${
+  isModern
+    ? spRootFolder
+    : this.utils.escapeURIComponent(spRootFolder)
+}'
       `);
       let metadataStr: string = this.options.metaFields.map((fieldName) => {
         return 'Files/ListItemAllFields/' + fieldName;
@@ -103,7 +107,11 @@ export default class RestAPI {
           &$select=
             Folders/Name,Folders/UniqueID,Folders/ID,Folders/ItemCount,Folders/ServerRelativeUrl,Folder/TimeCreated,Folder/TimeLastModified,
             Files/Name,Files/UniqueID,Files/ID,Files/ServerRelativeUrl,Files/Length,Files/TimeCreated,Files/TimeLastModified,Files/ModifiedBy
-          &@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spRootFolder)}'
+          &@FolderServerRelativeUrl='${
+  isModern
+    ? spRootFolder
+    : this.utils.escapeURIComponent(spRootFolder)
+}'
       `);
     }
 
@@ -239,7 +247,11 @@ export default class RestAPI {
     ? 'GetFolderByServerRelativePath(DecodedUrl=@FolderServerRelativeUrl)'
     : 'GetFolderByServerRelativeUrl(@FolderServerRelativeUrl)'
 }/listItemAllFields
-        ?@FolderServerRelativeUrl='${this.utils.escapeURIComponent(spFolder)}'
+      ?@FolderServerRelativeUrl='${
+  isModern
+    ? spFolder
+    : this.utils.escapeURIComponent(spFolder)
+}'
     `);
 
     return new Promise((resolve) => {
