@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "node-sp-auth-config": "^2.9.4",
+    "node-sp-auth-config": "^3.0.0",
     "sppull": "^2.7.0"
   },
   "devDependencies": {
